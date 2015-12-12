@@ -1,0 +1,9 @@
+node_modules
+*.debug
+*.tmp
+*.log
+.DS_Store
+settings.js
+settings.json
+coverage
+.idea
