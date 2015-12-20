@@ -1,22 +1,31 @@
-/* global describe, it, before, beforeEach */
+/* global describe, it, before, beforeEach, after */
 
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
-
 import settings from './settings.example.js';
-import startLDAPServer from './ldap-server';
+import TestLDAPServer from './ldap-server';
 import SimpleLDAP from '../src/';
 
 const { expect } = chai;
 chai.use(chaiAsPromised);
 
-
 describe('LDAP', () => {
   let ldap; // the ldap client
+  const server = new TestLDAPServer();
 
   // start the LDAP server for testing
   before((done) => {
-    startLDAPServer().then(done);
+    server
+      .start()
+      .then(done)
+      .catch(done);
+  });
+
+  after((done) => {
+    server
+      .stop()
+      .then(done)
+      .catch(done);
   });
 
   // create a new connection to test LDAP server
@@ -27,9 +36,10 @@ describe('LDAP', () => {
 
   describe('ldap.get()', () =>{
     it('should bind to DN automatically upon first query', () => {
-      return ldap.get()
+      return ldap
+        .get()
         .then(() => {
-          return expect(ldap._isBound).to.be.true;
+          return expect(ldap._isBoundTo).to.equal('cn=root');
         });
     });
 

@@ -25,28 +25,34 @@ export default class SimpleLDAPGet {
   constructor({ url, base, bind }) {
     this.settings = { url, base, bind };
     this._client = ldap.createClient({ url });
-    this._isBound = false;
+    this._isBoundTo = null;
     Promise.promisifyAll(this._client);
   }
 
   bindToDN() {
     const { dn, password } = this.settings.bind;
-    return this._client.bindAsync(dn, password);
+
+    return new Promise((resolve, reject) => {
+      // resolve immediately if we've already bound to this dn
+      if (this._isBoundTo === dn) {
+        resolve();
+      }
+
+      this._client.bindAsync(dn, password)
+        .then(() => {
+          console.log('successful bind');
+          this._isBoundTo = dn;
+          resolve();
+        })
+        .catch((err) => {
+          console.log('Something wrong with the binding');
+          reject(err);
+        });
+    });
   }
 
-  get(filter = '(uid=tstudent)', attributes) {
-    if (!this._isBound) {
-      this
-        .bindToDN()
-        .then(() => {
-          this._isBound = true;
-        })
-        .catch(console.error);
-    }
-
-    if (!filter) {
-      throw new Error('Please filter results');
-    }
+  get(filter = '(objectclass=*)', attributes) {
+    const self = this;
 
     const opts = {
       filter,
@@ -54,24 +60,27 @@ export default class SimpleLDAPGet {
       attributes,
     };
 
-    return this._client
-      .searchAsync(this._base, opts)
-      .then((res) => {
-        const data = [];
 
-        res.on('searchEntry', (entry) => {
-          data.push(_cleanEntry(entry.object));
-        });
-
+    return this.bindToDN()
+      .then(() => {
+        return self._client.searchAsync(self.settings.base, opts);
+      })
+      .then((response) => {
         return new Promise((resolve, reject) => {
-          res.on('error', (err) => {
+          const data = [];
+
+          response.on('searchEntry', (entry) => {
+            data.push(_cleanEntry(entry.object));
+          });
+
+          response.on('error', (err) => {
             reject(err);
           });
-          res.on('end', () => {
+
+          response.on('end', () => {
             resolve(data);
           });
         });
-      })
-      .catch(console.error);
+      });
   }
 }
