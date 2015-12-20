@@ -1,6 +1,6 @@
 export default [
   {
-    dn: 'uid=artvandelay,dc=users,dc=localhost',
+    dn: 'uid=artvandelay, dc=users, dc=localhost',
     attributes: {
       idNumber: 1234567,
       uid: 'artvandelay',
@@ -12,7 +12,7 @@ export default [
     },
   },
   {
-    dn: 'uid=ebenes,dc=users,dc=localhost',
+    dn: 'uid=ebenes, dc=users, dc=localhost',
     attributes: {
       idNumber: 765432,
       uid: 'ebenes',

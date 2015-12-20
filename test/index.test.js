@@ -4,6 +4,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import settings from './settings.example.js';
 import TestLDAPServer from './ldap-server';
+import mockData from './mockData';
 import SimpleLDAP from '../src/';
 
 const { expect } = chai;
@@ -43,27 +44,38 @@ describe('LDAP', () => {
         });
     });
 
-    // xit('initializes a connection for raw LDAP queries', () => {
-    //   const expected = {
-    //     dn: 'uid=artvandelay,dc=users,dc=localhost',
-    //     idNumber: 1234567,
-    //     uid: 'artvandelay',
-    //     givenName: 'Art',
-    //     sn: 'Vandelay',
-    //     telephoneNumber: '555-123-4567',
-    //   };
+    it('gets data from LDAP given a filter', () => {
+      const expected = {
+        dn: 'uid=artvandelay, dc=users, dc=localhost',
+        idNumber: 1234567,
+        uid: 'artvandelay',
+        givenName: 'Art',
+        sn: 'Vandelay',
+        telephoneNumber: '555-123-4567',
+      };
 
-    //   const filter = `(id-number=1234567)`;
-    //   const attributes = [
-    //     'idNumber',
-    //     'uid',
-    //     'givenName',
-    //     'sn',
-    //     'telephoneNumber',
-    //   ];
+      const filter = '(uid=artvandelay)';
+      const attributes = [
+        'idNumber',
+        'uid',
+        'givenName',
+        'sn',
+        'telephoneNumber',
+      ];
 
-    //   const data = ldap.get(filter, attributes);
-    //   return expect(data).to.eventually.eql([expected]);
-    // });
+      const data = ldap.get(filter, attributes);
+      return expect(data).to.eventually.eql([expected]);
+    });
+  });
+
+  it('gets all data from LDAP given no filter or attributes', (done) => {
+    const expected = mockData;
+
+    ldap.get()
+      .then((data) => {
+        expect(data.length).to.equal(expected.length);
+      })
+      .then(done)
+      .catch(done);
   });
 });
