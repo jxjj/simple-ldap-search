@@ -1,83 +1,40 @@
-import ldapjs from 'ldapjs';
-// import Promise from 'bluebird';
-// const fs = Promise.promisifyAll(require('fs'));
-// import fs from 'fs';
-import mockData from './mockData';
+import process from 'process';
+import ldap from 'ldapjs';
+import db from './mockData';
 
 function setupBind(server) {
-  server.bind('cn=root', (req, res, next) => {
-    if (req.dn.toString() !== 'cn=root' ||
-        req.credentials !== 'secret') {
-      return next(new ldapjs.InvalidCredentialsError());
-    }
 
-    res.end();
-    return next();
-  });
 }
 
-function loadPasswdFile(req, res, next) {
-  req.users = {};
-
-  mockData.forEach((user) => {
-    const {
-      dn,
-      idNumber,
-      uid,
-      givenName,
-      sn,
-      telephoneNumber,
-    } = user;
-
-    req.users[dn] = {
-      dn,
-      attributes: {
-        idNumber,
-        uid,
-        givenName,
-        sn,
-        telephoneNumber,
-        objectClass: 'posixAccount',
-      },
-    };
-  });
-
-  return next();
-}
-
-function authorize(req, res, next) {
-  if (!req.connection.ldap.bindDN.equals('cn=root')) {
-    return next(new ldapjs.InsufficientAccessRightsError());
-  }
-
-  return next();
-}
-
-function setupSearch(server, pre) {
-  server.search('dc=users', pre, (req, res, next) => {
-    Object.keys(req.users).forEach((user) => {
-      if (req.filter.matches(req.users[user].attributes)) {
-        res.send(req.users[user]);
+function setupSearch(server) {
+  server.search('dc=localhost', (req, res, next) => {
+    db.forEach((user) => {
+      if (req.filter.matches(user.attributes)) {
+        res.send(user);
       }
     });
-
     res.end();
-    return next();
+    next();
   });
 }
 
-function serverStart(server, port = 1389) {
-  server.listen(port, () => {
-    console.log('LDAP server listening at %s', server.url);
+// returns a promise to start a test ldap server
+export default function start() {
+  return new Promise((resolve, reject) => {
+    const server = ldap.createServer();
+    setupSearch(server);
+    server.listen(1389, (err) => {
+      if (err) throw reject(err);
+
+      console.log(`LDAP server started on ${server.url}`);
+
+      // setup clean close on process exit
+      // fixes ADDRINUSE error
+      process.on('exit', server.close.bind(server));
+      process.on('uncaughtException', server.close.bind(server));
+      process.on('SIGTERM', server.close.bind(server));
+
+      resolve();
+    });
   });
-}
-
-export default function startLDAPServer(port = 1389) {
-  const server = ldapjs.createServer();
-  const pre = [authorize, loadPasswdFile];
-
-  setupBind(server);
-  setupSearch(server, pre);
-  serverStart(server, port);
-  return server;
 }

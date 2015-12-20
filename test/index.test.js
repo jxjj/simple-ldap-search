@@ -1,4 +1,4 @@
-/* global describe, it */
+/* global describe, it, before, beforeEach */
 
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -12,8 +12,18 @@ chai.use(chaiAsPromised);
 
 
 describe('LDAP', () => {
-  startLDAPServer();
-  const ldap = new SimpleLDAP(settings.ldap);
+  let ldap; // the ldap client
+
+  // start the LDAP server for testing
+  before((done) => {
+    startLDAPServer().then(done);
+  });
+
+  // create a new connection to test LDAP server
+  beforeEach((done) => {
+    ldap = new SimpleLDAP(settings.ldap);
+    done();
+  });
 
   describe('ldap.get()', () =>{
     it('should bind to DN automatically upon first query', () => {
