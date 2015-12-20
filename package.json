@@ -1,7 +1,6 @@
 {
   "name": "simple-ldap-get",
   "description": "Simple LDAP Queries.",
-  "version": "0.0.0-semantic-versioning",
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
