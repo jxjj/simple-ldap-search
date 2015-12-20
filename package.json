@@ -1,6 +1,6 @@
 {
   "name": "simple-ldap-get",
-  "description": "Simple LDAP Queries.",
+  "description": "Simple LDAP queries.",
   "main": "dist/index.js",
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
