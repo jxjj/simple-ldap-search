@@ -40,12 +40,12 @@ export default class SimpleLDAPGet {
 
       this._client.bindAsync(dn, password)
         .then(() => {
-          console.log('successful bind');
+          // successful bind
           this._isBoundTo = dn;
           resolve();
         })
         .catch((err) => {
-          console.log('Something wrong with the binding');
+          console.error('Something wrong with the binding', err);
           reject(err);
         });
     });
