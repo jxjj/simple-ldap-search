@@ -1,4 +1,4 @@
 // eslintrc
 module.exports = {
-  extends: 'airbnb',
+  extends: 'airbnb-base',
 };
