@@ -35,12 +35,12 @@ describe('LDAP', () => {
     done();
   });
 
-  describe('ldap.get()', () =>{
+  describe('ldap.get()', () => {
     it('should bind to DN automatically upon first query', () => {
       return ldap
         .get()
         .then(() => {
-          return expect(ldap._isBoundTo).to.equal('cn=root');
+          return expect(ldap.isBoundTo).to.equal('cn=root');
         });
     });
 

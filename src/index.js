@@ -4,10 +4,10 @@
 
 import ldap from 'ldapjs';
 import Promise from 'bluebird';
-import _ from 'lodash';
+import lodash from 'lodash';
 
-function _cleanEntry(entryObj) {
-  return _.chain(entryObj)
+function cleanEntry(entryObj) {
+  return lodash.chain(entryObj)
     .omit('controls')
     .mapValues((value) => {
       // 'TRUE' to true
@@ -24,9 +24,9 @@ function _cleanEntry(entryObj) {
 export default class SimpleLDAPGet {
   constructor({ url, base, bind }) {
     this.settings = { url, base, bind };
-    this._client = ldap.createClient({ url });
-    this._isBoundTo = null;
-    Promise.promisifyAll(this._client);
+    this.client = ldap.createClient({ url });
+    this.isBoundTo = null;
+    Promise.promisifyAll(this.client);
   }
 
   bindToDN() {
@@ -34,18 +34,18 @@ export default class SimpleLDAPGet {
 
     return new Promise((resolve, reject) => {
       // resolve immediately if we've already bound to this dn
-      if (this._isBoundTo === dn) {
+      if (this.isBoundTo === dn) {
         resolve();
       }
 
-      this._client.bindAsync(dn, password)
+      this.client.bindAsync(dn, password)
         .then(() => {
-          // successful bind
-          this._isBoundTo = dn;
+          // console.log('successful bind');
+          this.isBoundTo = dn;
           resolve();
         })
         .catch((err) => {
-          console.error('Something wrong with the binding', err);
+          // console.log('Something wrong with the binding');
           reject(err);
         });
     });
@@ -63,14 +63,14 @@ export default class SimpleLDAPGet {
 
     return this.bindToDN()
       .then(() => {
-        return self._client.searchAsync(self.settings.base, opts);
+        return self.client.searchAsync(self.settings.base, opts);
       })
       .then((response) => {
         return new Promise((resolve, reject) => {
           const data = [];
 
           response.on('searchEntry', (entry) => {
-            data.push(_cleanEntry(entry.object));
+            data.push(cleanEntry(entry.object));
           });
 
           response.on('error', (err) => {
