@@ -2,6 +2,7 @@
   "name": "simple-ldap-get",
   "description": "Simple LDAP queries.",
   "main": "dist/index.js",
+  "version": "1.0.3",
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
     "build": "babel src/index.js -o dist/index.js",
@@ -13,7 +14,7 @@
     "test": "mocha test/*.test.js --compilers js:babel-core/register",
     "test:watch": "mocha -w test/*.test.js --compilers js:babel-core/register",
     "test:watch:single": "mocha -w --compilers js:babel-core/register",
-    "semantic-release": "semantic-release pre && npm run build && npm publish && semantic-release post",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post",
     "yolo": "npm run commit && git push"
   },
   "repository": {
