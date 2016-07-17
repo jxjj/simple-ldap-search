@@ -1,4 +1,3 @@
-import process from 'process';
 import ldap from 'ldapjs';
 import db from './mockData';
 
