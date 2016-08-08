@@ -2,8 +2,10 @@
 
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
+import through from 'through2';
+import concat from 'concat-stream';
 import settings from './settings.example.js';
-import TestLDAPServer from './ldap-server';
+import TestLDAPServer from './ldapServer';
 import mockData from './mockData';
 import SimpleLDAP from '../src/';
 
@@ -77,5 +79,33 @@ describe('LDAP', () => {
       })
       .then(done)
       .catch(done);
+  });
+
+  it.only('gets data as a stream', (done) => {
+    ldap.get()
+      .pipe(through.obj(function (obj, _, cb) {
+        if (!obj) return cb();
+        // relabel `idNumber` as `id`, `uid` as`username`,
+        // and create a fullName property. Ditch the rest.
+        this.push({
+          id: obj.idNumber,
+          username: obj.uid,
+          fullName: `${obj.givenName} ${obj.sn}`,
+        });
+        cb();
+      }))
+      .pipe(concat((data) => {
+        // console.log(data);
+        expect(data).to.eql([{
+          id: 1234567,
+          username: 'artvandelay',
+          fullName: 'Art Vandelay',
+        }, {
+          id: 765432,
+          username: 'ebenes',
+          fullName: 'Elaine Benes',
+        }]);
+        done();
+      }));
   });
 });

@@ -32,6 +32,7 @@
     "chai": "^3.4.1",
     "chai-as-promised": "^5.1.0",
     "commitizen": "^2.4.6",
+    "concat-stream": "^1.5.1",
     "cz-conventional-changelog": "^1.1.5",
     "eslint": "^3.1.0",
     "eslint-config-airbnb-base": "^4.0.2",
@@ -40,10 +41,12 @@
     "mocha": "^2.3.4",
     "nodemon": "^1.8.1",
     "semantic-release": "^4.3.5",
+    "through2": "^2.0.1",
     "validate-commit-message": "^3.0.1"
   },
   "dependencies": {
     "bluebird": "^3.0.6",
+    "emit-stream": "^0.1.2",
     "ldapjs": "^1.0.0",
     "lodash": "^4.13.1"
   },
