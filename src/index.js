@@ -58,9 +58,11 @@ export default class SimpleLDAPGet {
   get(filter = '(objectclass=*)', attributes) {
     const self = this;
     return {
+      // if then() is called, we return a promise with fn
       then(fn) {
         return self.getPromise(filter, attributes).then(fn);
       },
+      // if pipe is called we return a stream
       pipe(fn) {
         return self.getStream(filter, attributes).pipe(fn);
       },
@@ -69,43 +71,15 @@ export default class SimpleLDAPGet {
 
   getStream(filter, attributes) {
     const self = this;
-
     const opts = {
       filter,
       scope: 'sub',
       attributes,
     };
-
-    const buffer = [];
-    let isFinished = false;
-
-    self.stream = new Readable({
-      read() {
-
-
-        const nextItem = buffer.shift();
-        // if nextItem is null, then we're done!
-        if (nextItem === null) {
-          console.log('Ending read stream.');
-          return this.push(null);
-        }
-        // if next item is undefined, then our buffer is empty
-        // we should pause and wait for more data
-        if (nextItem === undefined) {
-          console.log('Buffer is empty. Pausing.');
-          self.stream.pause();
-        }
-
-        // otherwise we have data. Let's pass it along.
-        console.log('buffer', buffer);
-        console.log('nextItem', nextItem);
-        return this.push(nextItem);
-      },
+    const stream = new Readable({
+      read() {}, // no op
       objectMode: true,
     });
-
-    // start with the stream paused
-    //self.stream.pause();
 
     self.bindToDN()
       .then(() => {
@@ -113,12 +87,7 @@ export default class SimpleLDAPGet {
       })
       .then((response) => {
         response.on('searchEntry', (entry) => {
-          console.log('Data Received.');
-
-          //self.stream.resume();
-
-          console.log(entry.object);
-          buffer.push(cleanEntry(entry.object));
+          stream.push(cleanEntry(entry.object));
         });
 
         response.on('error', (err) => {
@@ -126,13 +95,11 @@ export default class SimpleLDAPGet {
         });
 
         response.on('end', () => {
-          console.log('Ending.')
-          self.stream.resume();
-          buffer.push(null);
+          stream.push(null);
         });
       });
 
-    return self.stream;
+    return stream;
   }
 
   getPromise(filter, attributes) {
@@ -143,7 +110,6 @@ export default class SimpleLDAPGet {
       scope: 'sub',
       attributes,
     };
-
 
     return this.bindToDN()
       .then(() => {

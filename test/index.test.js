@@ -37,6 +37,81 @@ describe('LDAP', () => {
     done();
   });
 
+  describe('ldap.getPromise()', () => {
+    it('gets data from LDAP given a filter', () => {
+      const expected = {
+        dn: 'uid=artvandelay, dc=users, dc=localhost',
+        idNumber: 1234567,
+        uid: 'artvandelay',
+        givenName: 'Art',
+        sn: 'Vandelay',
+        telephoneNumber: '555-123-4567',
+      };
+
+      const filter = '(uid=artvandelay)';
+      const attributes = [
+        'idNumber',
+        'uid',
+        'givenName',
+        'sn',
+        'telephoneNumber',
+      ];
+
+      const data = ldap.get(filter, attributes);
+      return expect(data).to.eventually.eql([expected]);
+    });
+
+    it('gets all data from LDAP given no filter or attributes', (done) => {
+      const expected = mockData;
+
+      ldap.getPromise()
+        .then((data) => {
+          expect(data.length).to.equal(expected.length);
+        })
+        .then(done)
+        .catch(done);
+    });
+  });
+
+  describe('ldap.getStream()', () => {
+    it('gets data from LDAP given a filter', (done) => {
+      const expected = {
+        dn: 'uid=artvandelay, dc=users, dc=localhost',
+        idNumber: 1234567,
+        uid: 'artvandelay',
+        givenName: 'Art',
+        sn: 'Vandelay',
+        telephoneNumber: '555-123-4567',
+      };
+
+      const filter = '(uid=artvandelay)';
+      const attributes = [
+        'idNumber',
+        'uid',
+        'givenName',
+        'sn',
+        'telephoneNumber',
+      ];
+
+      ldap.getStream(filter, attributes)
+        .pipe(concat((data) => {
+          expect(data).to.eql([expected]);
+          done();
+        }));
+    });
+
+    it('gets all data from LDAP given no filter or attributes', (done) => {
+      const expected = mockData;
+
+      ldap.getStream()
+        .pipe(concat((data) => {
+          expect(data.length).to.equal(expected.length);
+          done();
+        }));
+    });
+  });
+
+
   describe('ldap.get()', () => {
     it('should bind to DN automatically upon first query', () => {
       return ldap
@@ -81,9 +156,9 @@ describe('LDAP', () => {
       .catch(done);
   });
 
-  it.only('gets data as a stream', (done) => {
+  it('gets data as a stream', (done) => {
     ldap.get()
-      .pipe(through.obj(function (obj, _, cb) {
+      .pipe(through.obj(function remapProps(obj, _, cb) {
         if (!obj) return cb();
         // relabel `idNumber` as `id`, `uid` as`username`,
         // and create a fullName property. Ditch the rest.
@@ -92,7 +167,7 @@ describe('LDAP', () => {
           username: obj.uid,
           fullName: `${obj.givenName} ${obj.sn}`,
         });
-        cb();
+        return cb();
       }))
       .pipe(concat((data) => {
         // console.log(data);

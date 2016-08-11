@@ -11,7 +11,6 @@ Returns either a promise or a stream.
 
 ```js
 import SimpleLDAP from 'simple-ldap-get';
-import through from 'through2' // useful for streams
 
 const settings = {
   url: 'ldap://0.0.0.0:1389',
@@ -69,8 +68,21 @@ For large amounts of data, I recommend using the streams api. Streams can be pip
 In the example below, we use streams to remap some properties of LDAP data:
 
 ```js
-ldap.get(filter, attributes)
-  .pipe(through.obj((obj, _, done) => {
+import SimpleLDAP from 'simple-ldap-get';
+import through from 'through2' // useful for streams
+
+const settings = {
+  url: 'ldap://0.0.0.0:1389',
+  base: 'dc=users,dc=localhost',
+  bind: { dn: 'cn=root', password: 'secret' }
+}
+
+// create a new client
+const ldap = new SimpleLDAP(settings.ldap);
+
+
+ldap.get()
+  .pipe(through.obj(function (obj, _, done) => {
     // relabel `idNumber` as `id`, `uid` as`username`,
     // and create a fullName property. Ditch the rest.
     this.push({
@@ -85,6 +97,10 @@ ldap.get(filter, attributes)
   //   id: 1234567,
   //   username: 'artvandelay',
   //   fullName: 'Art Vandelay',
+  // }, {
+  //   id: 765432,
+  //   username: 'ebenes',
+  //   fullName: 'Elaine Benes',
   // }]
 ```
 
