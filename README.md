@@ -32,6 +32,7 @@ const attributes = [
 ];
 
 // Promise API
+// if ldap.get() is followed by a then, a promise is returned
 ldap
   .get(filter, attributes)
   .then(console.log);
@@ -46,7 +47,7 @@ ldap
 // }]
 
 // Streams API
-
+// if ldap.get() is followed by a pipe, a stream is returned.
 ldap
   .get(filter, attributes)
   .pipe(process.stdout)
