@@ -19,7 +19,7 @@ const settings = {
 }
 
 // create a new client
-const ldap = new SimpleLDAP(settings.ldap);
+const ldap = new SimpleLDAP(settings);
 
 // setup a filter and attributes for your LDAP query
 const filter = '(uid=artvandelay)';
