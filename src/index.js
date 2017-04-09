@@ -102,7 +102,7 @@ export default class SimpleLDAPGet {
           stream.push(null);
         });
       })
-      .catch(err => {
+      .catch((err) => {
         throw err;
       });
 
@@ -139,7 +139,7 @@ export default class SimpleLDAPGet {
           });
         });
       })
-      .catch(err => {
+      .catch((err) => {
         throw err;
       });
   }

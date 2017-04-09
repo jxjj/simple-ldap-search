@@ -6,11 +6,10 @@ cache:
 notifications:
   email: false
 node_js:
+  - 7
   - 6
-  - 5
-  - 4
 before_install:
-  - npm i -g npm@^2.0.0
+  - npm i -g npm@^3.0.0
 before_script:
   - npm prune
 script:
