@@ -58,6 +58,7 @@ describe('LDAP', () => {
     it('is destroyable after pipe', (done) => {
       ldap.get()
         .pipe(through.obj(function (obj, _, cb) {
+          if (!obj) return cb();
           // relabel `idNumber` as `id`, `uid` as`username`,
           // and create a fullName property. Ditch the rest.
           this.push({
@@ -65,7 +66,7 @@ describe('LDAP', () => {
             username: obj.uid,
             fullName: `${obj.givenName} ${obj.sn}`,
           });
-          cb();
+          return cb();
         }))
         .pipe(concat((data) => {
           expect(data).to.eql([{
