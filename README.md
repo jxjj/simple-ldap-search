@@ -60,9 +60,6 @@ ldap
   //   sn: 'Vandelay',
   //   telephoneNumber: '555-123-4567',
   // }]
-
-// disconnect from LDAP server and do no allow reconnection
-ldap.destroy();
 ```
 
 ## Streams Example
@@ -84,18 +81,26 @@ const settings = {
 // create a new client
 const ldap = new SimpleLDAP(settings);
 
-
 ldap.get()
-  .pipe(through.obj(function (obj, _, done) => {
-    // relabel `idNumber` as `id`, `uid` as`username`,
-    // and create a fullName property. Ditch the rest.
+  .pipe(through.obj(function transformIt(obj, _, done) {
+    if (!obj) return done();
+
+    // Transform the data, by relabeling `idNumber` as `id`,
+    // `uid` as`username`, and create a fullName property.
+    // Ditch the rest.
     this.push({
       id: obj.idNumber,
       username: obj.uid,
       fullName: `${obj.givenName} ${obj.sn}`,
     });
+    return done();
   }))
   .pipe(process.stdout)
+  .on('error', err => console.error(err))
+  .on('finish', () => {
+    // all done. Don't need the client anymore
+    ldap.destroy();
+  });
 
   // [{
   //   id: 1234567,
@@ -131,4 +136,27 @@ Returns a promise for the data.
 Returns a readable stream of data.
 
 ### `ldap.destroy()`
-Destroys the connection to the LDAP server.
+Destroys the connection to the LDAP server. Use when all done with LDAP client.
+
+```js
+  let ldap;
+
+  // Using Promise
+  ldap = new SimpleLDAP(settings);
+  ldap.get('(uid=artvandelay)')
+    .then(console.log)
+    .catch(console.error)
+    .finally(() => {
+      // nuke it
+      ldap.destroy();
+    });
+
+  // Using Stream
+  ldap = new SimpleLDAP(settings);
+  ldap.get()
+      .pipe(process.stdout)
+      .on('error', console.error);
+      .on('finish', () => {
+        ldap.destroy();
+      });
+```
