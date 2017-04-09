@@ -60,6 +60,9 @@ ldap
   //   sn: 'Vandelay',
   //   telephoneNumber: '555-123-4567',
   // }]
+
+// disconnect from LDAP server and do no allow reconnection
+ldap.destroy();
 ```
 
 ## Streams Example
@@ -79,7 +82,7 @@ const settings = {
 }
 
 // create a new client
-const ldap = new SimpleLDAP(settings.ldap);
+const ldap = new SimpleLDAP(settings);
 
 
 ldap.get()
@@ -126,3 +129,6 @@ Returns a promise for the data.
 
 ### `ldap.getStream(filter, attributes)`
 Returns a readable stream of data.
+
+### `ldap.destroy()`
+Destroys the connection to the LDAP server.

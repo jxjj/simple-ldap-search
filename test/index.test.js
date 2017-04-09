@@ -4,6 +4,7 @@ import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import through from 'through2';
 import concat from 'concat-stream';
+import ldapjs from 'ldapjs';
 import settings from './settings.example.js';
 import TestLDAPServer from './ldapServer';
 import mockData from './mockData';
@@ -33,9 +34,21 @@ describe('LDAP', () => {
 
   // create a new connection to test LDAP server
   beforeEach((done) => {
-    ldap = new SimpleLDAP(settings.ldap);
+    ldap = new SimpleLDAP(settings);
     done();
   });
+
+  describe('ldap client', () => {
+    it('new creates new instance of client', (done) => {
+      expect(ldap.client).to.be.instanceOf(ldapjs.Client);
+      done();
+    });
+    it('is destroyable', () => {
+      ldap.destroy();
+      expect(ldap.client).to.be.null;
+    });
+  });
+
 
   describe('ldap.getPromise()', () => {
     it('gets data from LDAP given a filter', () => {

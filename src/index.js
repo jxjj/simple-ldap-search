@@ -133,4 +133,11 @@ export default class SimpleLDAPGet {
         });
       });
   }
+
+  destroy() {
+    if (this.client) {
+      this.client.destroy();
+      this.client = null;
+    }
+  }
 }
