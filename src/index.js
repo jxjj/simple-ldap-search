@@ -39,18 +39,18 @@ export default class SimpleLDAPGet {
     return new Promise((resolve, reject) => {
       // resolve immediately if we've already bound to this dn
       if (this.isBoundTo === dn) {
-        resolve();
+        return resolve();
       }
 
-      this.client.bindAsync(dn, password)
+      return this.client.bindAsync(dn, password)
         .then(() => {
           // console.log('successful bind');
           this.isBoundTo = dn;
-          resolve();
+          return resolve();
         })
         .catch((err) => {
           // console.log('Something wrong with the binding');
-          reject(err);
+          return reject(err);
         });
     });
   }
@@ -81,6 +81,10 @@ export default class SimpleLDAPGet {
       objectMode: true,
     });
 
+    if (!self.client) {
+      throw Error('No Client');
+    }
+
     self.bindToDN()
       .then(() => {
         return self.client.searchAsync(self.settings.base, opts);
@@ -91,12 +95,15 @@ export default class SimpleLDAPGet {
         });
 
         response.on('error', (err) => {
-          console.error(err);
+          throw err;
         });
 
         response.on('end', () => {
           stream.push(null);
         });
+      })
+      .catch(err => {
+        throw err;
       });
 
     return stream;
@@ -131,6 +138,9 @@ export default class SimpleLDAPGet {
             resolve(data);
           });
         });
+      })
+      .catch(err => {
+        throw err;
       });
   }
 
@@ -139,5 +149,6 @@ export default class SimpleLDAPGet {
       this.client.destroy();
       this.client = null;
     }
+    this.isBoundTo = null;
   }
 }
