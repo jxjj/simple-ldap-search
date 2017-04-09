@@ -1,4 +1,4 @@
-/* global describe, it, before, beforeEach, after */
+/* global describe, it, before, beforeEach, after, afterEach */
 
 import chai from 'chai';
 import chaiAsPromised from 'chai-as-promised';
@@ -38,14 +38,54 @@ describe('LDAP', () => {
     done();
   });
 
+  // destroy any existing ldap connection
+  afterEach((done) => {
+    ldap.destroy();
+    done();
+  });
+
   describe('ldap client', () => {
     it('new creates new instance of client', (done) => {
       expect(ldap.client).to.be.instanceOf(ldapjs.Client);
       done();
     });
+
     it('is destroyable', () => {
       ldap.destroy();
       expect(ldap.client).to.be.null;
+    });
+
+    it('is destroyable after pipe', (done) => {
+      ldap.get()
+        .pipe(through.obj(function (obj, _, cb) {
+          // relabel `idNumber` as `id`, `uid` as`username`,
+          // and create a fullName property. Ditch the rest.
+          this.push({
+            id: obj.idNumber,
+            username: obj.uid,
+            fullName: `${obj.givenName} ${obj.sn}`,
+          });
+          cb();
+        }))
+        .pipe(concat((data) => {
+          expect(data).to.eql([{
+            id: 1234567,
+            username: 'artvandelay',
+            fullName: 'Art Vandelay',
+          }, {
+            id: 765432,
+            username: 'ebenes',
+            fullName: 'Elaine Benes',
+          }]);
+        }))
+        .on('finish', () => {
+          ldap.destroy();
+          expect(ldap.client).to.be.null;
+          done();
+        })
+        .on('error', (err) => {
+          done(err);
+        });
     });
   });
 
@@ -80,8 +120,8 @@ describe('LDAP', () => {
       ldap.getPromise()
         .then((data) => {
           expect(data.length).to.equal(expected.length);
+          done();
         })
-        .then(done)
         .catch(done);
     });
   });
@@ -183,7 +223,6 @@ describe('LDAP', () => {
         return cb();
       }))
       .pipe(concat((data) => {
-        // console.log(data);
         expect(data).to.eql([{
           id: 1234567,
           username: 'artvandelay',
