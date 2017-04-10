@@ -1,5 +1,6 @@
 import ldap from 'ldapjs';
 import userList from './mockData';
+import Promise from 'bluebird';
 
 function authHandler(req, res, next) {
   if (req.dn.toString() !== 'cn=root' || req.credentials !== 'secret') {
@@ -27,13 +28,37 @@ function searchHandler(req, res, next) {
   next();
 }
 
+function slowSearchHandler(req, res, next) {
+  const matchingUsers = [];
+  userList.forEach((user) => {
+    if (req.filter.matches(user.attributes)) {
+      matchingUsers.push(user);
+    }
+  });
+  // send with slow times
+  Promise.map(matchingUsers, user => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        res.send(user);
+        return resolve();
+      }, 1000);
+    });
+  })
+  .then(() => {
+    res.end();
+    next();
+  });
+  next();
+}
+
+
 class TestLDAPServer {
   constructor() {
     this.server = ldap.createServer();
     // setup auth
     this.server.bind('cn=root', authHandler);
 
-    // setup search
+    // normal search
     this.server.search('dc=localhost', searchHandler);
   }
 
@@ -56,6 +81,14 @@ class TestLDAPServer {
   stop() {
     this.server.close();
     return Promise.resolve();
+  }
+
+  slowConnection() {
+    this.server.search('dc=localhost', slowSearchHandler);
+  }
+
+  normalConnection() {
+    this.server.search('dc=localhost', searchHandler);
   }
 }
 

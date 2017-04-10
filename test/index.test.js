@@ -5,6 +5,7 @@ import chaiAsPromised from 'chai-as-promised';
 import through from 'through2';
 import concat from 'concat-stream';
 import ldapjs from 'ldapjs';
+import Promise from 'bluebird';
 import settings from './settings.example.js';
 import TestLDAPServer from './ldapServer';
 import mockData from './mockData';
@@ -34,6 +35,7 @@ describe('LDAP', () => {
 
   // create a new connection to test LDAP server
   beforeEach((done) => {
+    server.normalConnection();
     ldap = new SimpleLDAP(settings);
     done();
   });
@@ -90,7 +92,6 @@ describe('LDAP', () => {
     });
   });
 
-
   describe('ldap.getPromise()', () => {
     it('gets data from LDAP given a filter', () => {
       const expected = {
@@ -113,6 +114,41 @@ describe('LDAP', () => {
 
       const data = ldap.get(filter, attributes);
       return expect(data).to.eventually.eql([expected]);
+    });
+
+    it('handles SLOW concurrent requests', () => {
+      const uids = [
+        'artvandelay',
+        'ebenes',
+        'artvandelay',
+        'userdoesnotexist',
+      ];
+
+      server.slowConnection();
+
+      return Promise.map(uids, (uid) => {
+        return ldap.getPromise(`(uid=${uid})`, ['idNumber'])
+          .then(userList => userList[0]);
+      })
+      .then((results) => {
+        //console.dir(results);
+        expect(results).to.have.lengthOf(4);
+        expect(results[0].dn).to.equal('uid=artvandelay, dc=users, dc=localhost');
+      }
+      ).catch(console.error);
+    });
+
+    it('returns [] if no data matches filter', () => {
+      const filter = '(uid=userdoesnotexist)';
+      const attributes = [
+        'idNumber',
+        'uid',
+        'givenName',
+        'sn',
+        'telephoneNumber',
+      ];
+      const data = ldap.get(filter, attributes);
+      return expect(data).to.eventually.eql([]);
     });
 
     it('gets all data from LDAP given no filter or attributes', (done) => {
