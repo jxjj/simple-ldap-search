@@ -1,26 +1,29 @@
 import ldap from 'ldapjs';
-import userList from './mockData';
 import Promise from 'bluebird';
+import userList from './mockData';
 
-function authHandler(req, res, next) {
-  if (req.dn.toString() !== 'cn=root' || req.credentials !== 'secret') {
-    return next(new ldap.InvalidCredentialsError());
-  }
-  res.end();
+function authorize(req, res, next) {
+  if (!req.connection.ldap.bindDN.equals('cn=root'))
+    return next(new ldap.InsufficientAccessRightsError());
+
   return next();
 }
 
-function searchHandler(req, res, next) {
-  // console.log(`LDAPSERVER: testing against filter '${req.filter}'`);
+function authHandler(req, res, next) {
+  // introduce lag
+  setTimeout(() => {
+    if (req.dn.toString() !== 'cn=root' || req.credentials !== 'secret') {
+      return next(new ldap.InvalidCredentialsError());
+    }
+    res.end();
+    return next();
+  }, 500);
+}
 
-  // cycle through each user and attr
+function searchHandler(req, res, next) {
   userList.forEach((user) => {
-    // const { uid } = user.attributes;
     if (req.filter.matches(user.attributes)) {
-      // console.log(`LDAPSERVER: User '${uid}' -> MATCH`);
       res.send(user);
-    } else {
-      // console.log(`LDAPSERVER: User '${uid}' -> no match`);
     }
   });
 
@@ -36,14 +39,14 @@ function slowSearchHandler(req, res, next) {
     }
   });
   // send with slow times
-  Promise.map(matchingUsers, user => {
-    return new Promise((resolve, reject) => {
+  Promise.map(matchingUsers, user => (
+    new Promise((resolve) => {
       setTimeout(() => {
         res.send(user);
         return resolve();
       }, 1000);
-    });
-  })
+    })
+  ))
   .then(() => {
     res.end();
     next();
@@ -59,7 +62,7 @@ class TestLDAPServer {
     this.server.bind('cn=root', authHandler);
 
     // normal search
-    this.server.search('dc=localhost', searchHandler);
+    this.server.search('dc=localhost', authorize, searchHandler);
   }
 
   // returns a promise to start a test ldap server
@@ -84,11 +87,11 @@ class TestLDAPServer {
   }
 
   slowConnection() {
-    this.server.search('dc=localhost', slowSearchHandler);
+    this.server.search('dc=localhost', authorize, slowSearchHandler);
   }
 
   normalConnection() {
-    this.server.search('dc=localhost', searchHandler);
+    this.server.search('dc=localhost', authorize, searchHandler);
   }
 }
 

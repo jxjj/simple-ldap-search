@@ -1,142 +1,22 @@
 /**
 * A simple LDAP query machine
 */
-
 import ldap from 'ldapjs';
 import Promise from 'bluebird';
-import lodash from 'lodash';
-import { Readable } from 'stream';
-
-function cleanEntry(entryObj) {
-  return lodash.chain(entryObj)
-    .omit('controls')
-    .mapValues((value) => {
-      // 'TRUE' to true
-      if (value === 'TRUE') { return true; }
-
-      // if integer string, convert to number
-      if (/^\d+$/.test(value)) { return parseInt(value, 10); }
-
-      // otherwise the regular value
-      return value;
-    }).value();
-}
+import cleanEntry from './lib/cleanEntry';
 
 export default class SimpleLDAPGet {
-  constructor({ url, base, bind }) {
-    this.settings = { url, base, bind };
+  constructor({ url, base, dn, password }) {
+    this.config = { url, base, dn, password };
     this.client = ldap.createClient({ url });
     this.isBoundTo = null;
-    Promise.promisifyAll(this.client);
-
-    // setup passthrough stream
-    this.stream = null;
+    this.isBinding = false;
+    this.queue = [];
   }
 
-  bindToDN() {
-    const { dn, password } = this.settings.bind;
-
-    return new Promise((resolve, reject) => {
-      // resolve immediately if we've already bound to this dn
-      if (this.isBoundTo === dn) {
-        return resolve();
-      }
-
-      return this.client.bindAsync(dn, password)
-        .then(() => {
-          // console.log('successful bind');
-          this.isBoundTo = dn;
-          return resolve();
-        })
-        .catch(reject);
-    });
-  }
-
-  get(filter = '(objectclass=*)', attributes) {
-    const self = this;
-    return {
-      // if then() is called, we return a promise with fn
-      then(fn) {
-        return self.getPromise(filter, attributes).then(fn);
-      },
-      // if pipe is called we return a stream
-      pipe(fn) {
-        return self.getStream(filter, attributes).pipe(fn);
-      },
-    };
-  }
-
-  getStream(filter, attributes) {
-    const self = this;
-    const opts = {
-      filter,
-      scope: 'sub',
-      attributes,
-    };
-    const stream = new Readable({
-      read() {}, // no op
-      objectMode: true,
-    });
-
-    if (!self.client) {
-      throw Error('No Client');
-    }
-
-    self.bindToDN()
-      .then(() => self.client.searchAsync(self.settings.base, opts))
-      .then((response) => {
-        response.on('searchEntry', (entry) => {
-          stream.push(cleanEntry(entry.object));
-        });
-
-        response.on('error', (err) => {
-          throw err;
-        });
-
-        response.on('end', () => {
-          stream.push(null);
-        });
-      })
-      .catch((err) => {
-        throw err;
-      });
-
-    return stream;
-  }
-
-  getPromise(filter, attributes) {
-    const self = this;
-
-    const opts = {
-      filter,
-      scope: 'sub',
-      attributes,
-    };
-
-    return this.bindToDN()
-      .then(() => self.client.searchAsync(self.settings.base, opts))
-      .then(response => (
-        new Promise((resolve, reject) => {
-          const data = [];
-
-          response.on('searchEntry', (entry) => {
-            data.push(cleanEntry(entry.object));
-          });
-
-          response.on('error', (err) => {
-            reject(err);
-          });
-
-          response.on('end', () => {
-            resolve(data);
-          });
-        })
-      ))
-      .catch((err) => {
-        throw err;
-      });
-  }
-
+  /**
+   * destroys the ldap client
+   */
   destroy() {
     if (this.client) {
       this.client.destroy();
@@ -144,4 +24,130 @@ export default class SimpleLDAPGet {
     }
     this.isBoundTo = null;
   }
+
+  bindDN() {
+    const self = this;
+    const { dn, password } = this.config;
+
+    return new Promise((resolve, reject) => {
+      if (!dn || !password) {
+        return reject('No bind credentials provided');
+      }
+
+      if (this.isBoundTo === dn) {
+        return resolve();
+      }
+
+      if (this.isBoundTo && this.isBoundTo !== dn) {
+        return reject(`bound to different dn: ${dn}`);
+      }
+
+      if (this.isBinding) {
+        return this.client.on('isBound', resolve);
+      }
+
+      self.isBinding = true;
+      return this.client.bind(dn, password, (err, res) => {
+        if (err) return reject(err);
+
+        self.isBinding = false;
+        self.isBoundTo = dn;
+
+        // emit a bind message on success
+        // signalling to any other client
+        // that tried to bind that we're ready
+        self.client.emit('isBound');
+        return resolve(res);
+      });
+    });
+  }
+
+  /**
+   * searches ldap. Will autobind if
+   * this.config.dn and this.config.password are set.
+   */
+  async search(filter = '(objectclass=*)', attributes) {
+    const self = this;
+    const opts = {
+      scope: 'sub',
+      filter,
+      attributes,
+    };
+    const results = [];
+
+    // bind if not bound
+    try {
+      await self.bindDN();
+    } catch (err) {
+      Promise.reject(err);
+    }
+
+    return new Promise((resolve, reject) => {
+      self.client.search(self.config.base, opts, (err, res) => {
+        if (err) {
+          return reject(`search failed ${err.message}`);
+        }
+
+        return res
+          .on('searchEntry', entry => (
+            results.push(cleanEntry(entry.object))
+          ))
+          .on('error', resError => (
+            reject(`search Error: ${resError}`)
+          ))
+          .on('end', () => resolve(results));
+      });
+    });
+  }
 }
+
+//   async bindToDN({ dn, password }) {
+//     // resolve immediately if we've already bound to this dn
+//     if (this.isBoundTo === dn) return;
+
+//     try {
+//       await this.client.bindAsync(dn, password);
+//     } catch (err) {
+//       throw err;
+//     }
+//     this.isBoundTo = dn;
+//   }
+
+//   search(filter = '(objectclass=*)', attributes) {
+//     const self = this;
+
+//     const opts = {
+//       filter,
+//       scope: 'sub',
+//       attributes,
+//     };
+
+
+//     return new Promise((resolve, reject) => {
+//       self.client.search(self.config.base, opts, (err, res) => {
+//         if (err) return reject(err);
+
+//         const results = [];
+//         res.on('searchEntry', (entry) => {
+//           results.push(cleanEntry(entry.object));
+//         });
+
+//         res.on('error', (resError) => {
+//           throw resError;
+//         });
+
+//         res.on('end', () => {
+//           resolve(results);
+//         });
+//       });
+//     });
+//   }
+
+//   destroy() {
+//     if (this.client) {
+//       this.client.destroy();
+//       this.client = null;
+//     }
+//     this.isBoundTo = null;
+//   }
+// }

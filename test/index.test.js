@@ -1,275 +1,131 @@
-/* global describe, it, before, beforeEach, after, afterEach */
-
-import chai from 'chai';
-import chaiAsPromised from 'chai-as-promised';
-import through from 'through2';
-import concat from 'concat-stream';
+import test from 'ava';
 import ldapjs from 'ldapjs';
 import Promise from 'bluebird';
-import settings from './settings.example.js';
-import TestLDAPServer from './ldapServer';
-import mockData from './mockData';
-import SimpleLDAP from '../src/';
+import config from './fixtures/config.example';
+import TestLDAPServer from './fixtures/TestLDAPServer';
+import SimpleLDAP from '../src';
 
-const { expect } = chai;
-chai.use(chaiAsPromised);
+const server = new TestLDAPServer();
+let ldap;
 
-describe('LDAP', () => {
-  let ldap; // the ldap client
-  const server = new TestLDAPServer();
+test.before('start LDAP Server', async () => server.start());
 
-  // start the LDAP server for testing
-  before((done) => {
-    server
-      .start()
-      .then(done)
-      .catch(done);
-  });
+test.after('stop LDAP Server', async () => server.stop());
 
-  after((done) => {
-    server
-      .stop()
-      .then(done)
-      .catch(done);
-  });
+test.beforeEach('new client', () => {
+  server.normalConnection();
+  ldap = new SimpleLDAP(config);
+});
 
-  // create a new connection to test LDAP server
-  beforeEach((done) => {
-    server.normalConnection();
-    ldap = new SimpleLDAP(settings);
-    done();
-  });
+test.afterEach('cleanup', () => {
+  ldap.destroy();
+});
 
-  // destroy any existing ldap connection
-  afterEach((done) => {
-    ldap.destroy();
-    done();
-  });
+test('create a new LDAP client', t => (
+  t.true(ldap.client instanceof ldapjs.Client)
+));
 
-  describe('ldap client', () => {
-    it('new creates new instance of client', (done) => {
-      expect(ldap.client).to.be.instanceOf(ldapjs.Client);
-      done();
-    });
+test('ldap.destroy()', (t) => {
+  ldap.destroy();
+  t.is(ldap.client, null);
+});
 
-    it('is destroyable', () => {
-      ldap.destroy();
-      expect(ldap.client).to.be.null;
-    });
+test('bindDN(dn, password)', async (t) => {
+  const { dn, password } = config;
+  const res = await ldap.bindDN(dn, password);
+  t.truthy(res);
+  t.truthy(ldap.isBoundTo);
+  t.false(ldap.isBinding);
+});
 
-    it('is destroyable after pipe', (done) => {
-      ldap.get()
-        .pipe(through.obj(function (obj, _, cb) {
-          if (!obj) return cb();
-          // relabel `idNumber` as `id`, `uid` as`username`,
-          // and create a fullName property. Ditch the rest.
-          this.push({
-            id: obj.idNumber,
-            username: obj.uid,
-            fullName: `${obj.givenName} ${obj.sn}`,
-          });
-          return cb();
-        }))
-        .pipe(concat((data) => {
-          expect(data).to.eql([{
-            id: 1234567,
-            username: 'artvandelay',
-            fullName: 'Art Vandelay',
-          }, {
-            id: 765432,
-            username: 'ebenes',
-            fullName: 'Elaine Benes',
-          }]);
-        }))
-        .on('finish', () => {
-          ldap.destroy();
-          expect(ldap.client).to.be.null;
-          done();
-        })
-        .on('error', (err) => {
-          done(err);
-        });
-    });
-  });
+test('isBoundTo correctly tracks whether bound or not', async (t) => {
+  const { dn, password } = config;
+  t.falsy(ldap.isBoundTo);
+  const bindPromise = ldap.bindDN(dn, password);
+  t.falsy(ldap.isBoundTo);
+  await bindPromise;
+  t.truthy(ldap.isBoundTo);
+});
 
-  describe('ldap.getPromise()', () => {
-    it('gets data from LDAP given a filter', () => {
-      const expected = {
-        dn: 'uid=artvandelay, dc=users, dc=localhost',
-        idNumber: 1234567,
-        uid: 'artvandelay',
-        givenName: 'Art',
-        sn: 'Vandelay',
-        telephoneNumber: '555-123-4567',
-      };
+test('isBinding correctly tracks if a bind is in progress', async (t) => {
+  const { dn, password } = config;
 
-      const filter = '(uid=artvandelay)';
-      const attributes = [
-        'idNumber',
-        'uid',
-        'givenName',
-        'sn',
-        'telephoneNumber',
-      ];
+  // begins as false
+  t.false(ldap.isBinding);
+  const bindPromise = ldap.bindDN(dn, password);
 
-      const data = ldap.get(filter, attributes);
-      return expect(data).to.eventually.eql([expected]);
-    });
+  // once the bind process begins, isBinding should be true
+  t.true(ldap.isBinding);
+  await bindPromise;
+  t.truthy(ldap.isBoundTo);
 
-    it('handles SLOW concurrent requests', () => {
-      const uids = [
-        'artvandelay',
-        'ebenes',
-        'artvandelay',
-        'userdoesnotexist',
-      ];
+  // back to false
+  t.false(ldap.isBinding);
+});
 
-      server.slowConnection();
+test('ldap.bindDN() handles multiple binds without falling over', async (t) => {
+  ldap.bindDN();
+  t.notThrows(ldap.bindDN());
+  t.notThrows(ldap.bindDN());
 
-      return Promise.map(uids, (uid) => {
-        return ldap.getPromise(`(uid=${uid})`, ['idNumber'])
-          .then(userList => userList[0]);
-      })
-      .then((results) => {
-        //console.dir(results);
-        expect(results).to.have.lengthOf(4);
-        expect(results[0].dn).to.equal('uid=artvandelay, dc=users, dc=localhost');
-      }
-      ).catch(console.error);
-    });
+  try {
+    await ldap.bindDN();
+  } catch (err) {
+    console.error(err);
+  }
 
-    it('returns [] if no data matches filter', () => {
-      const filter = '(uid=userdoesnotexist)';
-      const attributes = [
-        'idNumber',
-        'uid',
-        'givenName',
-        'sn',
-        'telephoneNumber',
-      ];
-      const data = ldap.get(filter, attributes);
-      return expect(data).to.eventually.eql([]);
-    });
+  const users = await ldap.search('uid=artvandelay', ['idNumber']);
+  t.is(users.length, 1);
+  t.is(users[0].idNumber, 1234567);
+});
 
-    it('gets all data from LDAP given no filter or attributes', (done) => {
-      const expected = mockData;
+test('concurrent searches', async (t) => {
+  const uids = [
+    'artvandelay',
+    'ebenes',
+    'artvandelay',
+    'ebenes',
+    'invaliduser',
+  ];
 
-      ldap.getPromise()
-        .then((data) => {
-          expect(data.length).to.equal(expected.length);
-          done();
-        })
-        .catch(done);
-    });
-  });
+  await ldap.bindDN();
 
-  describe('ldap.getStream()', () => {
-    it('gets data from LDAP given a filter', (done) => {
-      const expected = {
-        dn: 'uid=artvandelay, dc=users, dc=localhost',
-        idNumber: 1234567,
-        uid: 'artvandelay',
-        givenName: 'Art',
-        sn: 'Vandelay',
-        telephoneNumber: '555-123-4567',
-      };
+  const results = await Promise.map(uids, uid => (
+    ldap.search(`uid=${uid}`)
+      .then(users => (users.length ? users[0] : null))
+  ));
 
-      const filter = '(uid=artvandelay)';
-      const attributes = [
-        'idNumber',
-        'uid',
-        'givenName',
-        'sn',
-        'telephoneNumber',
-      ];
+  t.is(results[0].uid, 'artvandelay');
+  t.is(results[1].uid, 'ebenes');
+  t.is(results[4], null);
+});
 
-      ldap.getStream(filter, attributes)
-        .pipe(concat((data) => {
-          expect(data).to.eql([expected]);
-          done();
-        }));
-    });
+test('ldap.search() returns array of results', async (t) => {
+  const expected = {
+    dn: 'uid=artvandelay, dc=users, dc=localhost',
+    idNumber: 1234567,
+    uid: 'artvandelay',
+    givenName: 'Art',
+    sn: 'Vandelay',
+    telephoneNumber: '555-123-4567',
+  };
 
-    it('gets all data from LDAP given no filter or attributes', (done) => {
-      const expected = mockData;
+  const filter = '(uid=artvandelay)';
+  const attributes = [
+    'idNumber',
+    'uid',
+    'givenName',
+    'sn',
+    'telephoneNumber',
+  ];
 
-      ldap.getStream()
-        .pipe(concat((data) => {
-          expect(data.length).to.equal(expected.length);
-          done();
-        }));
-    });
-  });
+  const { dn, password } = config;
+  try {
+    await ldap.bindDN(dn, password);
+  } catch (err) {
+    console.error(err);
+  }
 
-
-  describe('ldap.get()', () => {
-    it('should bind to DN automatically upon first query', () => {
-      return ldap
-        .get()
-        .then(() => {
-          return expect(ldap.isBoundTo).to.equal('cn=root');
-        });
-    });
-
-    it('gets data from LDAP given a filter', () => {
-      const expected = {
-        dn: 'uid=artvandelay, dc=users, dc=localhost',
-        idNumber: 1234567,
-        uid: 'artvandelay',
-        givenName: 'Art',
-        sn: 'Vandelay',
-        telephoneNumber: '555-123-4567',
-      };
-
-      const filter = '(uid=artvandelay)';
-      const attributes = [
-        'idNumber',
-        'uid',
-        'givenName',
-        'sn',
-        'telephoneNumber',
-      ];
-
-      const data = ldap.get(filter, attributes);
-      return expect(data).to.eventually.eql([expected]);
-    });
-  });
-
-  it('gets all data from LDAP given no filter or attributes', (done) => {
-    const expected = mockData;
-
-    ldap.get()
-      .then((data) => {
-        expect(data.length).to.equal(expected.length);
-      })
-      .then(done)
-      .catch(done);
-  });
-
-  it('gets data as a stream', (done) => {
-    ldap.get()
-      .pipe(through.obj(function remapProps(obj, _, cb) {
-        if (!obj) return cb();
-        // relabel `idNumber` as `id`, `uid` as`username`,
-        // and create a fullName property. Ditch the rest.
-        this.push({
-          id: obj.idNumber,
-          username: obj.uid,
-          fullName: `${obj.givenName} ${obj.sn}`,
-        });
-        return cb();
-      }))
-      .pipe(concat((data) => {
-        expect(data).to.eql([{
-          id: 1234567,
-          username: 'artvandelay',
-          fullName: 'Art Vandelay',
-        }, {
-          id: 765432,
-          username: 'ebenes',
-          fullName: 'Elaine Benes',
-        }]);
-        done();
-      }));
-  });
+  const data = await ldap.search(filter, attributes);
+  t.deepEqual(data, [expected]);
 });
