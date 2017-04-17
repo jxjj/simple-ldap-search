@@ -1,7 +1,7 @@
 # Simple LDAP Search
 
-[![Travis Build](https://img.shields.io/travis/geekydatamonkey/simple-ldap-search.svg?style=flat)](https://travis-ci.org/geekydatamonkey/simple-ldap-get)
-[![NPM Version](https://img.shields.io/npm/v/simple-ldap-search.svg)](https://www.npmjs.com/package/simple-ldap-get)
+[![Travis Build](https://img.shields.io/travis/geekydatamonkey/simple-ldap-search.svg?style=flat)](https://travis-ci.org/geekydatamonkey/simple-ldap-search)
+[![NPM Version](https://img.shields.io/npm/v/simple-ldap-search.svg)](https://www.npmjs.com/package/simple-ldap-search)
 
 > Searches LDAP. Nothing fancy.
 
