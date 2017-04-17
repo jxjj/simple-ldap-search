@@ -65,6 +65,6 @@ Returns
 ### `ldap.destroy()`
 Destroys the connection to the LDAP server. Use when all done with LDAP client.
 
-## Changes since v1
+
 
 
