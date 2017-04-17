@@ -73,8 +73,7 @@
       "env"
     ],
     "plugins": [
-      "transform-regenerator",
-      "transform-runtime"
+      "transform-regenerator"
     ]
   }
 }
