@@ -5,7 +5,7 @@
 
 > Searches LDAP. Nothing fancy.
 
-A thin, promisified wrapper over (LDAPjs)[http://ldapjs.org]'s client.
+A thin, promisified wrapper over [LDAPjs](http://ldapjs.org)'s client.
 
 ## Installation
 ```sh
