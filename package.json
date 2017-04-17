@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
-    "build": "babel src/index.js -o dist/index.js",
+    "build": "babel src --out-dir dist",
     "start": "nodemon ./src/index.js --exec babel-node -- --use_strict",
     "test:server": "nodemon ./test/ldap-server --exec babel-node --",
     "commit": "git-cz",
