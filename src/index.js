@@ -43,7 +43,9 @@ export default class SimpleLDAPGet {
       }
 
       if (this.isBinding) {
-        return this.client.on('isBound', resolve);
+        // put this resolve function on the queue
+        // to be called when binding completes
+        return this.queue.push(resolve);
       }
 
       self.isBinding = true;
@@ -53,10 +55,8 @@ export default class SimpleLDAPGet {
         self.isBinding = false;
         self.isBoundTo = dn;
 
-        // emit a bind message on success
-        // signalling to any other client
-        // that tried to bind that we're ready
-        self.client.emit('isBound');
+        // resolve everything on this.queue
+        self.queue.forEach(fn => fn());
         return resolve(res);
       });
     });

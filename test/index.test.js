@@ -86,6 +86,16 @@ test('concurrent searches', async (t) => {
     'artvandelay',
     'ebenes',
     'invaliduser',
+    'artvandelay',
+    'ebenes',
+    'artvandelay',
+    'ebenes',
+    'invaliduser',
+    'artvandelay',
+    'ebenes',
+    'artvandelay',
+    'ebenes',
+    'invaliduser',
   ];
 
   await ldap.bindDN();
@@ -95,6 +105,7 @@ test('concurrent searches', async (t) => {
       .then(users => (users.length ? users[0] : null))
   ));
 
+  t.is(results.length, uids.length);
   t.is(results[0].uid, 'artvandelay');
   t.is(results[1].uid, 'ebenes');
   t.is(results[4], null);
