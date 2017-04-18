@@ -5,7 +5,7 @@ import ldap from 'ldapjs';
 import Promise from 'bluebird';
 import cleanEntry from './lib/cleanEntry';
 
-export default class SimpleLDAPGet {
+export default class SimpleLDAPSearch {
   constructor({ url, base, dn, password }) {
     this.config = { url, base, dn, password };
     this.client = ldap.createClient({ url });
