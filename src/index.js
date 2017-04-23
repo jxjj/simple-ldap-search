@@ -57,6 +57,7 @@ export default class SimpleLDAPSearch {
 
         // resolve everything on this.queue
         self.queue.forEach(fn => fn());
+        self.queue = [];
         return resolve(res);
       });
     });
