@@ -3,7 +3,9 @@
   "description": "Simple LDAP Searching.",
   "main": "dist/index.js",
   "version": "0.0.0-development",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
     "build": "babel src --out-dir dist",
@@ -63,11 +65,16 @@
     }
   },
   "ava": {
-    "require": ["babel-register", "babel-polyfill"],
+    "require": [
+      "babel-register",
+      "babel-polyfill"
+    ],
     "babel": "inherit"
   },
   "babel": {
-    "presets": ["env"],
+    "presets": [
+      "env"
+    ],
     "plugins": [
       [
         "transform-runtime",
