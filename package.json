@@ -2,10 +2,8 @@
   "name": "simple-ldap-search",
   "description": "Simple LDAP Searching.",
   "main": "dist/index.js",
-  "version": "1.1.3",
-  "files": [
-    "dist"
-  ],
+  "version": "0.0.0-development",
+  "files": ["dist"],
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
     "build": "babel src --out-dir dist",
@@ -16,14 +14,14 @@
     "eslint": "eslint src",
     "test": "ava --verbose",
     "check:updates": "ncu",
-    "check:security": "nsp",
+    "check:security": "nsp check",
     "test:watch": "ava --verbose --watch test",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post",
     "yolo": "npm run commit && git push"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/geekydatamonkey/simple-ldap-search.git"
+    "url": "https://github.com/jxjj/simple-ldap-search.git"
   },
   "author": "James Johnson",
   "license": "MIT",
@@ -65,16 +63,11 @@
     }
   },
   "ava": {
-    "require": [
-      "babel-register",
-      "babel-polyfill"
-    ],
+    "require": ["babel-register", "babel-polyfill"],
     "babel": "inherit"
   },
   "babel": {
-    "presets": [
-      "env"
-    ],
+    "presets": ["env"],
     "plugins": [
       [
         "transform-runtime",
