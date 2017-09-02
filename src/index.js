@@ -77,11 +77,7 @@ export default class SimpleLDAPSearch {
     const results = [];
 
     // bind if not bound
-    try {
-      await self.bindDN();
-    } catch (err) {
-      return Promise.reject(err);
-    }
+    await self.bindDN();
 
     return new Promise((resolve, reject) => {
       self.client.search(self.config.base, opts, (err, res) => {
