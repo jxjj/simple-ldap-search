@@ -80,7 +80,7 @@ export default class SimpleLDAPSearch {
     try {
       await self.bindDN();
     } catch (err) {
-      Promise.reject(err);
+      return Promise.reject(err);
     }
 
     return new Promise((resolve, reject) => {
@@ -90,12 +90,8 @@ export default class SimpleLDAPSearch {
         }
 
         return res
-          .on('searchEntry', entry => (
-            results.push(cleanEntry(entry.object))
-          ))
-          .on('error', resError => (
-            reject(`search Error: ${resError}`)
-          ))
+          .on('searchEntry', entry => results.push(cleanEntry(entry.object)))
+          .on('error', resError => reject(`search Error: ${resError}`))
           .on('end', () => resolve(results));
       });
     });

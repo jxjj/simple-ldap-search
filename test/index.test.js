@@ -20,7 +20,7 @@ test.afterEach('cleanup', (t) => {
   t.context.ldap.destroy();
 });
 
-test('create a new LDAP client', t => {
+test('create a new LDAP client', (t) => {
   const { ldap } = t.context;
   t.true(ldap.client instanceof ldapjs.Client);
 });
@@ -111,10 +111,9 @@ test('concurrent searches', async (t) => {
 
   await ldap.bindDN();
 
-  const results = await Promise.map(uids, uid => (
-    ldap.search(`uid=${uid}`)
-      .then(users => (users.length ? users[0] : null))
-  ));
+  const results = await Promise.map(uids, uid =>
+    ldap.search(`uid=${uid}`).then(users => (users.length ? users[0] : null)),
+  );
 
   t.is(results.length, uids.length);
   t.is(results[0].uid, 'artvandelay');
@@ -135,13 +134,7 @@ test('ldap.search() returns array of results', async (t) => {
   };
 
   const filter = '(uid=artvandelay)';
-  const attributes = [
-    'idNumber',
-    'uid',
-    'givenName',
-    'sn',
-    'telephoneNumber',
-  ];
+  const attributes = ['idNumber', 'uid', 'givenName', 'sn', 'telephoneNumber'];
 
   const { dn, password } = config;
   try {
@@ -153,4 +146,15 @@ test('ldap.search() returns array of results', async (t) => {
   const data = await ldap.search(filter, attributes);
   t.deepEqual(data, [expected]);
   t.is(ldap.queue.length, 0);
+});
+
+test('config lacks dn and password', async (t) => {
+  const { url, base } = config;
+  const ldap = new SimpleLDAP({ url, base });
+  try {
+    await ldap.search('uid=artvandelay');
+    t.fail();
+  } catch (err) {
+    t.pass();
+  }
 });

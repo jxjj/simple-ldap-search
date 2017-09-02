@@ -3,8 +3,9 @@ import Promise from 'bluebird';
 import userList from './mockData';
 
 function authorize(req, res, next) {
-  if (!req.connection.ldap.bindDN.equals('cn=root'))
+  if (!req.connection.ldap.bindDN.equals('cn=root')) {
     return next(new ldap.InsufficientAccessRightsError());
+  }
 
   return next();
 }
@@ -39,21 +40,21 @@ function slowSearchHandler(req, res, next) {
     }
   });
   // send with slow times
-  Promise.map(matchingUsers, user => (
-    new Promise((resolve) => {
-      setTimeout(() => {
-        res.send(user);
-        return resolve();
-      }, 1000);
-    })
-  ))
-  .then(() => {
+  Promise.map(
+    matchingUsers,
+    user =>
+      new Promise((resolve) => {
+        setTimeout(() => {
+          res.send(user);
+          return resolve();
+        }, 1000);
+      }),
+  ).then(() => {
     res.end();
     next();
   });
   next();
 }
-
 
 class TestLDAPServer {
   constructor() {
