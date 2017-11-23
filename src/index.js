@@ -49,7 +49,9 @@ export default class SimpleLDAPSearch {
       }
 
       self.isBinding = true;
+      this.client.once('error', reject);
       return this.client.bind(dn, password, (err, res) => {
+        this.client.removeAllListeners('error');
         if (err) return reject(err);
 
         self.isBinding = false;
@@ -80,7 +82,9 @@ export default class SimpleLDAPSearch {
     await self.bindDN();
 
     return new Promise((resolve, reject) => {
+      this.client.once('error', reject);
       self.client.search(self.config.base, opts, (err, res) => {
+        this.client.removeAllListeners('error');
         if (err) {
           return reject(`search failed ${err.message}`);
         }
