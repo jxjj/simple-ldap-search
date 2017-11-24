@@ -4,6 +4,7 @@
 import ldap from 'ldapjs';
 import Promise from 'bluebird';
 import cleanEntry from './lib/cleanEntry';
+import addListenerIfNotAdded from './lib/addListenerIfNotAdded';
 
 export default class SimpleLDAPSearch {
   constructor({ url, base, dn, password }) {
@@ -30,6 +31,10 @@ export default class SimpleLDAPSearch {
     const { dn, password } = this.config;
 
     return new Promise((resolve, reject) => {
+      // handle case where ldapjs client emits 'error' event
+      // e.g. if a bad URL is given
+      addListenerIfNotAdded(self.client, 'error', reject);
+
       if (!dn || !password) {
         return reject('No bind credentials provided');
       }
@@ -49,9 +54,7 @@ export default class SimpleLDAPSearch {
       }
 
       self.isBinding = true;
-      this.client.once('error', reject);
       return this.client.bind(dn, password, (err, res) => {
-        this.client.removeAllListeners('error');
         if (err) return reject(err);
 
         self.isBinding = false;
@@ -82,17 +85,18 @@ export default class SimpleLDAPSearch {
     await self.bindDN();
 
     return new Promise((resolve, reject) => {
-      this.client.once('error', reject);
+      // handle case where ldapjs client emits 'error' event
+      addListenerIfNotAdded(this.client, 'error', reject);
+
       self.client.search(self.config.base, opts, (err, res) => {
-        this.client.removeAllListeners('error');
         if (err) {
           return reject(`Search failed: ${err.message}`);
         }
 
         return res
           .on('searchEntry', entry => results.push(cleanEntry(entry.object)))
-          .on('error', resError => reject(`Search error: ${resError}`))
-          .on('end', () => resolve(results));
+          .once('error', resError => reject(`Search error: ${resError}`))
+          .once('end', () => resolve(results));
       });
     });
   }
