@@ -11,7 +11,6 @@
     "build": "babel src --out-dir dist",
     "start": "nodemon ./src/index.js --exec babel-node -- --use_strict",
     "test:server": "nodemon ./test/ldap-server --exec babel-node --",
-    "commit": "git-cz",
     "clean": "rm -rf dist && rm -rf coverage",
     "eslint": "eslint src",
     "test": "ava --verbose",
@@ -19,6 +18,7 @@
     "deps:upgrade": "ncu -u",
     "deps:check:security": "nsp check",
     "test:watch": "ava --verbose --watch test",
+    "prepublish": "npm run build",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post",
     "yolo": "npm run commit && git push"
   },
