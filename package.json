@@ -16,8 +16,7 @@
     "deps:upgrade": "ncu -u",
     "deps:check:security": "nsp check",
     "test:watch": "ava --verbose --watch test",
-    "prepublish": "npm run build",
-    "yolo": "npm run commit && git push"
+    "prepublish": "npm run build"
   },
   "repository": {
     "type": "git",
