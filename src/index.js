@@ -1,14 +1,21 @@
 /**
-* A simple LDAP query machine
-*/
+ * A simple LDAP query machine
+ */
 import ldap from 'ldapjs';
 import Promise from 'bluebird';
 import cleanEntry from './lib/cleanEntry';
 import addListenerIfNotAdded from './lib/addListenerIfNotAdded';
 
 export default class SimpleLDAPSearch {
-  constructor({ url, base, dn, password }) {
-    this.config = { url, base, dn, password };
+  constructor({
+    url, base, dn, password,
+  }) {
+    this.config = {
+      url,
+      base,
+      dn,
+      password,
+    };
     this.client = ldap.createClient({ url });
     this.isBoundTo = null;
     this.isBinding = false;
@@ -36,7 +43,7 @@ export default class SimpleLDAPSearch {
       addListenerIfNotAdded(self.client, 'error', reject);
 
       if (!dn || !password) {
-        return reject('No bind credentials provided');
+        return reject(new Error('No bind credentials provided'));
       }
 
       if (this.isBoundTo === dn) {
@@ -44,7 +51,7 @@ export default class SimpleLDAPSearch {
       }
 
       if (this.isBoundTo && this.isBoundTo !== dn) {
-        return reject(`bound to different dn: ${dn}`);
+        return reject(new Error(`bound to different dn: ${dn}`));
       }
 
       if (this.isBinding) {
@@ -90,12 +97,12 @@ export default class SimpleLDAPSearch {
 
       self.client.search(self.config.base, opts, (err, res) => {
         if (err) {
-          return reject(`Search failed: ${err.message}`);
+          return reject(new Error(`Search failed: ${err.message}`));
         }
 
         return res
           .on('searchEntry', entry => results.push(cleanEntry(entry.object)))
-          .once('error', resError => reject(`Search error: ${resError}`))
+          .once('error', resError => reject(new Error(`Search error: ${resError}`)))
           .once('end', () => resolve(results));
       });
     });

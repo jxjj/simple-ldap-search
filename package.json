@@ -2,7 +2,7 @@
   "name": "simple-ldap-search",
   "description": "Simple LDAP Searching.",
   "main": "dist/index.js",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "files": [
     "dist"
   ],
