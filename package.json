@@ -2,7 +2,7 @@
   "name": "simple-ldap-search",
   "description": "Simple LDAP Searching.",
   "main": "dist/index.js",
-  "version": "0.0.0-development",
+  "version": "2.0.3",
   "files": [
     "dist"
   ],
@@ -45,6 +45,7 @@
     "eslint-plugin-import": "^2.8.0",
     "ghooks": "^2.0.0",
     "nodemon": "^1.12.1",
+    "np": "^2.17.0",
     "npm-check-updates": "^2.13.0",
     "nsp": "^3.1.0",
     "prettier-eslint": "^8.2.2",
