@@ -86,12 +86,12 @@ export default class SimpleLDAPSearch {
       self.client.search(self.config.base, opts, (err, res) => {
         this.client.removeAllListeners('error');
         if (err) {
-          return reject(`search failed ${err.message}`);
+          return reject(`Search failed: ${err.message}`);
         }
 
         return res
           .on('searchEntry', entry => results.push(cleanEntry(entry.object)))
-          .on('error', resError => reject(`search Error: ${resError}`))
+          .on('error', resError => reject(`Search error: ${resError}`))
           .on('end', () => resolve(results));
       });
     });

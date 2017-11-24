@@ -159,10 +159,11 @@ test('config lacks dn and password', async (t) => {
   }
 });
 
-// The scenario is really easy to reproduce, just try to call search against a url which doesnt respond - when the HTTP request for bind times out the node process will get killed by an uncaught exception.
-
-test('handle ldapjs emitted errors', async (t) => {
-  // invalid url
+// See Issue #9:
+// "some errors are emitted rather than calling the error callback ...
+// to reproduce ... search against a url which doesnt respond"
+test('handle errors when bad LDAP url', async (t) => {
+  // invalid LDAP url
   const url = 'ldap://0.0.0.0:9999';
   const { base, dn, password } = config;
   const ldap = new SimpleLDAP({ url, base, dn, password });
@@ -170,7 +171,6 @@ test('handle ldapjs emitted errors', async (t) => {
     await ldap.search('uid=artvandelay');
     t.fail();
   } catch (err) {
-    console.log(`An error: ${err}`);
     t.pass();
   }
 });
