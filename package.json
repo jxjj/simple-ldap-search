@@ -14,9 +14,9 @@
     "clean": "rm -rf dist && rm -rf coverage",
     "eslint": "eslint src",
     "test": "ava --verbose",
-    "deps:check:updates": "ncu",
-    "deps:upgrade": "ncu -u",
-    "deps:check:security": "nsp check",
+    "deps:check": "ncu",
+    "deps:upgrade": "ncu -ua",
+    "deps:security": "nsp check",
     "test:watch": "ava --verbose --watch test",
     "prepublish": "npm run build"
   },
@@ -27,29 +27,29 @@
   "author": "James Johnson",
   "license": "MIT",
   "devDependencies": {
-    "ava": "^0.23.0",
-    "babel-cli": "^6.3.15",
-    "babel-core": "^6.2.1",
+    "ava": "^0.25.0",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
     "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.1",
-    "babel-register": "^6.3.13",
+    "babel-register": "^6.26.0",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
-    "concat-stream": "^1.5.1",
-    "eslint": "^4.11.0",
+    "concat-stream": "^1.6.1",
+    "eslint": "^4.18.2",
     "eslint-config-airbnb-base": "^12.1.0",
-    "eslint-plugin-import": "^2.8.0",
-    "nodemon": "^1.12.1",
-    "np": "^2.17.0",
-    "npm-check-updates": "^2.13.0",
-    "nsp": "^3.1.0",
-    "prettier-eslint": "^8.2.2"
+    "eslint-plugin-import": "^2.9.0",
+    "nodemon": "^1.17.1",
+    "np": "^2.20.1",
+    "npm-check-updates": "^3.0.0-alpha2",
+    "nsp": "^3.2.1",
+    "prettier-eslint": "^8.8.1"
   },
   "dependencies": {
-    "babel-runtime": "^6.23.0",
+    "babel-runtime": "^6.26.0",
     "bluebird": "^3.5.1",
-    "ldapjs": "^1.0.0",
-    "lodash": "^4.13.1"
+    "ldapjs": "^1.0.2",
+    "lodash": "^4.17.5"
   },
   "ava": {
     "require": [
