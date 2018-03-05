@@ -1,5 +1,5 @@
 import ldap from 'ldapjs';
-import Promise from 'bluebird';
+import promiseMap from 'p-map';
 import userList from './mockData';
 
 function authorize(req, res, next) {
@@ -40,7 +40,7 @@ function slowSearchHandler(req, res, next) {
     }
   });
   // send with slow times
-  Promise.map(
+  promiseMap(
     matchingUsers,
     user =>
       new Promise((resolve) => {

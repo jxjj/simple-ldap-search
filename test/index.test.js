@@ -1,6 +1,6 @@
 import test from 'ava';
 import ldapjs from 'ldapjs';
-import Promise from 'bluebird';
+import promiseMap from 'p-map';
 import config from './fixtures/config.example';
 import TestLDAPServer from './fixtures/TestLDAPServer';
 import SimpleLDAP from '../src';
@@ -111,9 +111,8 @@ test('concurrent searches', async (t) => {
 
   await ldap.bindDN();
 
-  const results = await Promise.map(uids, uid =>
-    ldap.search(`uid=${uid}`).then(users => (users.length ? users[0] : null)),
-  );
+  const results = await promiseMap(uids, uid =>
+    ldap.search(`uid=${uid}`).then(users => (users.length ? users[0] : null)));
 
   t.is(results.length, uids.length);
   t.is(results[0].uid, 'artvandelay');
@@ -166,7 +165,12 @@ test('handle errors when bad LDAP url', async (t) => {
   // invalid LDAP url
   const url = 'ldap://0.0.0.0:9999';
   const { base, dn, password } = config;
-  const ldap = new SimpleLDAP({ url, base, dn, password });
+  const ldap = new SimpleLDAP({
+    url,
+    base,
+    dn,
+    password,
+  });
   try {
     await ldap.search('uid=artvandelay');
     t.fail();

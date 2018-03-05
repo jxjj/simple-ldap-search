@@ -2,7 +2,6 @@
  * A simple LDAP query machine
  */
 import ldap from 'ldapjs';
-import Promise from 'bluebird';
 import cleanEntry from './lib/cleanEntry';
 import addListenerIfNotAdded from './lib/addListenerIfNotAdded';
 
