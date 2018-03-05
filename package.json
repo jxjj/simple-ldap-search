@@ -3,9 +3,7 @@
   "description": "Simple LDAP Searching.",
   "main": "dist/index.js",
   "version": "2.0.5",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
     "build": "babel src --out-dir dist",
@@ -18,7 +16,8 @@
     "deps:upgrade": "ncu -ua",
     "deps:security": "nsp check",
     "test:watch": "ava --verbose --watch test",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "release": "np"
   },
   "repository": {
     "type": "git",
@@ -52,16 +51,11 @@
     "lodash": "^4.17.5"
   },
   "ava": {
-    "require": [
-      "babel-register",
-      "babel-polyfill"
-    ],
+    "require": ["babel-register", "babel-polyfill"],
     "babel": "inherit"
   },
   "babel": {
-    "presets": [
-      "env"
-    ],
+    "presets": ["env"],
     "plugins": [
       [
         "transform-runtime",
