@@ -3,9 +3,7 @@
   "description": "Simple LDAP Searching.",
   "main": "dist/index.js",
   "version": "2.0.6",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
     "build": "babel src --out-dir dist",
@@ -15,7 +13,7 @@
     "eslint": "eslint src",
     "test": "ava --verbose",
     "test:watch": "ava --verbose --watch test",
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "release": "np"
   },
   "repository": {
@@ -39,7 +37,7 @@
     "eslint-config-airbnb-base": "^12.1.0",
     "eslint-plugin-import": "^2.12.0",
     "nodemon": "^1.17.5",
-    "np": "^3.0.4",
+    "np": "*",
     "p-map": "^1.2.0",
     "prettier-eslint": "^8.8.1"
   },
@@ -49,16 +47,11 @@
     "ldapjs": "^1.0.2"
   },
   "ava": {
-    "require": [
-      "babel-register",
-      "babel-polyfill"
-    ],
+    "require": ["babel-register", "babel-polyfill"],
     "babel": "inherit"
   },
   "babel": {
-    "presets": [
-      "env"
-    ],
+    "presets": ["env"],
     "plugins": [
       [
         "transform-object-rest-spread",
