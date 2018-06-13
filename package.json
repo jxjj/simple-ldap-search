@@ -50,8 +50,7 @@
   },
   "ava": {
     "require": [
-      "babel-register",
-      "babel-polyfill"
+      "babel-register"
     ],
     "babel": "inherit"
   },
@@ -60,16 +59,8 @@
       "env"
     ],
     "plugins": [
-      [
-        "transform-object-rest-spread",
-        "transform-runtime",
-        {
-          "helpers": false,
-          "polyfill": false,
-          "regenerator": true,
-          "moduleName": "babel-runtime"
-        }
-      ]
+      "transform-object-rest-spread",
+      "transform-runtime"
     ]
   }
 }
