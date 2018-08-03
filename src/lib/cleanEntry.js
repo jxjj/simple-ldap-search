@@ -15,7 +15,10 @@ export default function cleanEntry(entryObj) {
     }
 
     // if integer string, convert to number
-    if (/^(-|\+)?\d+$/.test(value)) {
+    // numbers that begin with a leading "0" like "0012345"
+    // will be left as strings.
+    // Zero will still be converted to 0.
+    if (/^(-|\+)?(0|[1-9]\d*)$/.test(value)) {
       return { ...acc, [key]: parseInt(value, 10) };
     }
 

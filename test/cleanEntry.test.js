@@ -32,3 +32,11 @@ test('cleanEntry(listOfObjects) cleans the whole list', (t) => {
 
   t.deepEqual(cleanedList, expected);
 });
+
+test('cleanEntry() does not convert "numbers" with leading zeros to integers', (t) => {
+  t.deepEqual(cleanEntry({ id: '123', phone: '00491234567' }), { id: 123, phone: '00491234567' });
+});
+
+test('cleanEntry() DOES convert 0 to an integer', (t) => {
+  t.deepEqual(cleanEntry({ temp: '0' }), { temp: 0 });
+});
