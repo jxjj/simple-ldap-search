@@ -82,6 +82,7 @@ export default class SimpleLDAPSearch {
     const self = this;
     const opts = {
       scope: 'sub',
+      paged: true,
       filter,
       attributes,
     };
