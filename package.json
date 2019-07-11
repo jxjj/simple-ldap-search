@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
-    "build": "babel src --out-dir dist",
+    "build": "babel src --out-dir dist --ignore src/**/*.test.js",
     "clean": "rm -rf dist && rm -rf coverage",
     "eslint": "eslint src",
     "test": "jest",
@@ -23,6 +23,7 @@
   "author": "James Johnson",
   "license": "MIT",
   "devDependencies": {
+    "@babel/cli": "7.5.0",
     "@babel/core": "7.5.4",
     "@babel/preset-env": "7.5.4",
     "@babel/register": "7.4.4",
