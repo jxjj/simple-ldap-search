@@ -8,6 +8,7 @@
 A thin, promisified wrapper over [LDAPjs](http://ldapjs.org)'s client.
 
 ## Installation
+
 ```sh
 $ npm install --save simple-ldap-search
 ```
@@ -22,20 +23,14 @@ const config = {
   base: 'dc=users,dc=localhost',
   dn: 'cn=root',
   password: 'secret',
-}
+};
 
 // create a new client
 const ldap = new SimpleLDAP(config);
 
 // setup a filter and attributes for your LDAP query
 const filter = '(uid=artvandelay)';
-const attributes = [
-  'idNumber',
-  'uid',
-  'givenName',
-  'sn',
-  'telephoneNumber',
-];
+const attributes = ['idNumber', 'uid', 'givenName', 'sn', 'telephoneNumber'];
 
 // using async/await
 const users = await ldap.search(filter, attributes);
@@ -48,7 +43,6 @@ const users = await ldap.search(filter, attributes);
 //   sn: 'Vandelay',
 //   telephoneNumber: '555-123-4567',
 // }]
-
 ```
 
 ## API
@@ -56,12 +50,14 @@ const users = await ldap.search(filter, attributes);
 ### `ldap.search(filter, attributes)`
 
 Parameters
-  - `filter`: filters results.
-  - `attributes`: a list of attributes to return
+
+- `filter`: filters results.
+- `attributes`: a list of attributes to return
 
 Returns
-  - A promise for the results
+
+- A promise for the results
 
 ### `ldap.destroy()`
-Destroys the connection to the LDAP server. Use when all done with LDAP client.
 
+Destroys the connection to the LDAP server. Use when all done with LDAP client.

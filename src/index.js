@@ -6,9 +6,7 @@ import cleanEntry from './lib/cleanEntry';
 import addListenerIfNotAdded from './lib/addListenerIfNotAdded';
 
 export default class SimpleLDAPSearch {
-  constructor({
-    url, base, dn, password,
-  }) {
+  constructor({ url, base, dn, password }) {
     this.config = {
       url,
       base,
@@ -101,7 +99,9 @@ export default class SimpleLDAPSearch {
 
         return res
           .on('searchEntry', entry => results.push(cleanEntry(entry.object)))
-          .once('error', resError => reject(new Error(`Search error: ${resError}`)))
+          .once('error', resError => {
+            return reject(new Error(`Search error: ${resError}`));
+          })
           .once('end', () => resolve(results));
       });
     });

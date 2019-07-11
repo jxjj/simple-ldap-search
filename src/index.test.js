@@ -113,8 +113,11 @@ describe('simple-ldap-search index', () => {
 
     await ldap.bindDN();
 
-    const results = await promiseMap(uids, uid =>
-      ldap.search(`uid=${uid}`).then(users => (users.length ? users[0] : null)));
+    const results = await promiseMap(uids, uid => {
+      return ldap
+        .search(`uid=${uid}`)
+        .then(users => (users.length ? users[0] : null));
+    });
 
     expect(results.length).toBe(uids.length);
     expect(results[0].uid).toBe('artvandelay');
@@ -135,7 +138,13 @@ describe('simple-ldap-search index', () => {
       };
 
       const filter = '(uid=artvandelay)';
-      const attributes = ['idNumber', 'uid', 'givenName', 'sn', 'telephoneNumber'];
+      const attributes = [
+        'idNumber',
+        'uid',
+        'givenName',
+        'sn',
+        'telephoneNumber',
+      ];
 
       const { dn, password } = config;
       await ldap.bindDN(dn, password);
@@ -149,7 +158,9 @@ describe('simple-ldap-search index', () => {
   it('throws if config lacks dn and password', async () => {
     const { url, base } = config;
     ldap = new SimpleLDAP({ url, base });
-    expect(ldap.search('uid=artvandelay')).rejects.toThrow(/No bind credentials/);
+    expect(ldap.search('uid=artvandelay')).rejects.toThrow(
+      /No bind credentials/,
+    );
   });
 
   // See Issue #9:

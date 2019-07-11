@@ -22,7 +22,7 @@ function authHandler(req, res, next) {
 }
 
 function searchHandler(req, res, next) {
-  userList.forEach((user) => {
+  userList.forEach(user => {
     if (req.filter.matches(user.attributes)) {
       res.send(user);
     }
@@ -34,7 +34,7 @@ function searchHandler(req, res, next) {
 
 function slowSearchHandler(req, res, next) {
   const matchingUsers = [];
-  userList.forEach((user) => {
+  userList.forEach(user => {
     if (req.filter.matches(user.attributes)) {
       matchingUsers.push(user);
     }
@@ -43,7 +43,7 @@ function slowSearchHandler(req, res, next) {
   promiseMap(
     matchingUsers,
     user =>
-      new Promise((resolve) => {
+      new Promise(resolve => {
         setTimeout(() => {
           res.send(user);
           return resolve();
@@ -71,7 +71,7 @@ class TestLDAPServer {
     const self = this;
 
     return new Promise((resolve, reject) => {
-      self.server.listen(1389, (err) => {
+      self.server.listen(1389, err => {
         if (err) {
           // console.error(`LDAP SERVER: Error listening: ${err}`);
           return reject(err);
@@ -82,6 +82,7 @@ class TestLDAPServer {
       });
     });
   }
+
   stop() {
     this.server.close();
     return Promise.resolve();

@@ -1,19 +1,20 @@
+/* eslint no-console: off */
 import arrayIncludesFunction from './arrayIncludesFunction';
 
 describe('arrayIncludesFunction', () => {
   it('is false if function is not in list', () => {
-    const arr = [1, console.log, 3, function () {}];
+    const arr = [1, console.log, 3, () => {}];
     const testFn = msg => console.log(msg);
     expect(arrayIncludesFunction(arr, testFn)).toBeFalsy();
   });
 
   it('is true if function is in list', () => {
-    const arr = [1, console.log, 3, function () {}];
+    const arr = [1, console.log, 3, () => {}];
     expect(arrayIncludesFunction(arr, console.log)).toBe(true);
   });
 
   it('is true if reference points to same fn', () => {
-    const arr = [1, console.log, 3, function () {}];
+    const arr = [1, console.log, 3, () => {}];
     const print = console.log;
     expect(arrayIncludesFunction(arr, print)).toBe(true);
   });
@@ -25,7 +26,7 @@ describe('arrayIncludesFunction', () => {
         console.log(msg);
       },
       3,
-      function () {},
+      () => {},
     ];
 
     function print2(msg) {
