@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "prebuild": "rm -rf dist && mkdir dist",
-    "build": "babel src --out-dir dist --ignore src/**/*.test.js",
+    "build": "babel src --out-dir dist --ignore 'src/**/*.test.js'",
     "clean": "rm -rf dist && rm -rf coverage",
     "eslint": "eslint src",
     "test": "jest",
