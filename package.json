@@ -7,13 +7,17 @@
     "dist"
   ],
   "scripts": {
-    "prebuild": "rm -rf dist && mkdir dist",
+    "prebuild": "npm run clean",
     "build": "babel src --out-dir dist --ignore 'src/**/*.test.js'",
-    "clean": "rm -rf dist && rm -rf coverage",
+    "format": "prettier --write \"{src,test}/**/*.{js,ts}\" index.d.ts \"**/*.md\"",
+    "format:check": "prettier --list-different \"{src,test}/**/*.{js,ts}\" index.d.ts \"**/*.md\"",
+    "lint": "eslint src test",
+    "pretest": "npm run build",
+    "clean": "rimraf dist",
     "eslint": "eslint src",
     "test": "jest",
     "test:watch": "jest --watch",
-    "prepare": "npm run build",
+    "prepare": "npm run clean && npm run format:check && npm run lint && npm test",
     "release": "np"
   },
   "repository": {
@@ -32,14 +36,20 @@
     "@babel/core": "7.5.4",
     "@babel/preset-env": "7.5.4",
     "@babel/register": "7.4.4",
+    "babel-eslint": "10.0.2",
     "babel-jest": "24.8.0",
-    "eslint": "^4.19.1",
-    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint": "6.0.1",
+    "eslint-config-airbnb": "17.1.1",
+    "eslint-config-prettier": "6.0.0",
     "eslint-plugin-import": "2.18.0",
+    "eslint-plugin-jsx-a11y": "6.2.3",
+    "eslint-plugin-prettier": "3.1.0",
+    "eslint-plugin-react": "7.14.2",
     "jest": "24.8.0",
     "np": "5.0.3",
     "p-map": "^1.2.0",
-    "prettier-eslint": "^8.8.2"
+    "prettier": "1.18.2",
+    "rimraf": "2.6.3"
   },
   "dependencies": {
     "ldapjs": "^1.0.2"
