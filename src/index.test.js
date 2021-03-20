@@ -129,7 +129,7 @@ describe('simple-ldap-search index', () => {
   describe('ldap.search', () => {
     it('returns array of results', async () => {
       const expected = {
-        dn: 'uid=artvandelay, dc=users, dc=localhost',
+        dn: 'uid=artvandelay,dc=users,dc=localhost',
         idNumber: 1234567,
         uid: 'artvandelay',
         givenName: 'Art',
