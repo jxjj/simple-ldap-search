@@ -8,7 +8,7 @@
     "lib/**/*.js"
   ],
   "scripts": {
-    "eslint": "eslint src",
+    "eslint": "eslint index.js lib test",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch",
     "release": "np"

@@ -1,6 +1,6 @@
 import ldap from 'ldapjs';
 import promiseMap from 'p-map';
-import userList from './mockData';
+import userList from './mockData.js';
 
 function authorize(req, res, next) {
   if (!req.connection.ldap.bindDN.equals('cn=root')) {
@@ -22,7 +22,7 @@ function authHandler(req, res, next) {
 }
 
 function searchHandler(req, res, next) {
-  userList.forEach(user => {
+  userList.forEach((user) => {
     if (req.filter.matches(user.attributes)) {
       res.send(user);
     }
@@ -34,7 +34,7 @@ function searchHandler(req, res, next) {
 
 function slowSearchHandler(req, res, next) {
   const matchingUsers = [];
-  userList.forEach(user => {
+  userList.forEach((user) => {
     if (req.filter.matches(user.attributes)) {
       matchingUsers.push(user);
     }
@@ -42,13 +42,12 @@ function slowSearchHandler(req, res, next) {
   // send with slow times
   promiseMap(
     matchingUsers,
-    user =>
-      new Promise(resolve => {
-        setTimeout(() => {
-          res.send(user);
-          return resolve();
-        }, 1000);
-      }),
+    (user) => new Promise((resolve) => {
+      setTimeout(() => {
+        res.send(user);
+        return resolve();
+      }, 1000);
+    }),
   ).then(() => {
     res.end();
     next();
@@ -71,7 +70,7 @@ class TestLDAPServer {
     const self = this;
 
     return new Promise((resolve, reject) => {
-      self.server.listen(1389, err => {
+      self.server.listen(1389, (err) => {
         if (err) {
           // console.error(`LDAP SERVER: Error listening: ${err}`);
           return reject(err);

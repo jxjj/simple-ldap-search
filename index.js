@@ -2,11 +2,13 @@
  * A simple LDAP query machine
  */
 import ldap from 'ldapjs';
-import cleanEntry from './lib/cleanEntry';
-import addListenerIfNotAdded from './lib/addListenerIfNotAdded';
+import cleanEntry from './lib/cleanEntry.js';
+import addListenerIfNotAdded from './lib/addListenerIfNotAdded.js';
 
 export default class SimpleLDAPSearch {
-  constructor({ url, base, dn, password }) {
+  constructor({
+    url, base, dn, password,
+  }) {
     this.config = {
       url,
       base,
@@ -65,7 +67,7 @@ export default class SimpleLDAPSearch {
         self.isBoundTo = dn;
 
         // resolve everything on this.queue
-        self.queue.forEach(fn => fn());
+        self.queue.forEach((fn) => fn());
         self.queue = [];
         return resolve(res);
       });
@@ -98,10 +100,8 @@ export default class SimpleLDAPSearch {
         }
 
         return res
-          .on('searchEntry', entry => results.push(cleanEntry(entry.object)))
-          .once('error', resError => {
-            return reject(new Error(`Search error: ${resError}`));
-          })
+          .on('searchEntry', (entry) => results.push(cleanEntry(entry.object)))
+          .once('error', (resError) => reject(new Error(`Search error: ${resError}`)))
           .once('end', () => resolve(results));
       });
     });
