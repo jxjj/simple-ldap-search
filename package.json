@@ -1,7 +1,7 @@
 {
   "name": "simple-ldap-search",
   "description": "Simple LDAP Searching.",
-  "version": "2.0.11",
+  "version": "3.0.0",
   "type": "module",
   "files": [
     "index.js",
@@ -14,8 +14,8 @@
     "release": "np"
   },
   "engines": {
-		"node": ">=12"
-	},
+    "node": ">=12"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/jxjj/simple-ldap-search.git"
