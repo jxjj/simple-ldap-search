@@ -32,26 +32,26 @@
     "search"
   ],
   "devDependencies": {
-    "@babel/cli": "7.5.0",
-    "@babel/core": "7.5.4",
-    "@babel/preset-env": "7.5.4",
-    "@babel/register": "7.4.4",
+    "@babel/cli": "7.13.10",
+    "@babel/core": "7.13.10",
+    "@babel/preset-env": "7.13.10",
+    "@babel/register": "7.13.8",
     "babel-eslint": "10.0.2",
-    "babel-jest": "24.8.0",
-    "eslint": "6.0.1",
-    "eslint-config-airbnb": "17.1.1",
-    "eslint-config-prettier": "6.0.0",
-    "eslint-plugin-import": "2.18.0",
-    "eslint-plugin-jsx-a11y": "6.2.3",
-    "eslint-plugin-prettier": "3.1.0",
-    "eslint-plugin-react": "7.14.2",
-    "jest": "24.8.0",
-    "np": "5.0.3",
-    "p-map": "^1.2.0",
-    "prettier": "1.18.2",
-    "rimraf": "2.6.3"
+    "babel-jest": "26.6.3",
+    "eslint": "7.22.0",
+    "eslint-config-airbnb": "18.2.1",
+    "eslint-config-prettier": "8.1.0",
+    "eslint-plugin-import": "2.22.1",
+    "eslint-plugin-jsx-a11y": "6.4.1",
+    "eslint-plugin-prettier": "3.3.1",
+    "eslint-plugin-react": "7.22.0",
+    "jest": "26.6.3",
+    "np": "7.4.0",
+    "p-map": "^4.0.0",
+    "prettier": "2.2.1",
+    "rimraf": "3.0.2"
   },
   "dependencies": {
-    "ldapjs": "^1.0.2"
+    "ldapjs": "^2.2.4"
   }
 }
