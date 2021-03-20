@@ -1,25 +1,21 @@
 {
   "name": "simple-ldap-search",
   "description": "Simple LDAP Searching.",
-  "main": "dist/index.js",
   "version": "2.0.11",
+  "type": "module",
   "files": [
-    "dist"
+    "index.js",
+    "lib/**/*.js"
   ],
   "scripts": {
-    "prebuild": "npm run clean",
-    "build": "babel src --out-dir dist --ignore 'src/**/*.test.js'",
-    "format": "prettier --write \"{src,test}/**/*.{js,ts}\" index.d.ts \"**/*.md\"",
-    "format:check": "prettier --list-different \"{src,test}/**/*.{js,ts}\" index.d.ts \"**/*.md\"",
-    "lint": "eslint src test",
-    "pretest": "npm run build",
-    "clean": "rimraf dist",
     "eslint": "eslint src",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "prepare": "npm run clean && npm run format:check && npm run lint && npm test",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch",
     "release": "np"
   },
+  "engines": {
+		"node": ">=12"
+	},
   "repository": {
     "type": "git",
     "url": "https://github.com/jxjj/simple-ldap-search.git"
@@ -32,19 +28,10 @@
     "search"
   ],
   "devDependencies": {
-    "@babel/cli": "7.13.10",
-    "@babel/core": "7.13.10",
-    "@babel/preset-env": "7.13.10",
-    "@babel/register": "7.13.8",
-    "babel-eslint": "10.0.2",
-    "babel-jest": "26.6.3",
-    "eslint": "7.22.0",
-    "eslint-config-airbnb": "18.2.1",
-    "eslint-config-prettier": "8.1.0",
-    "eslint-plugin-import": "2.22.1",
-    "eslint-plugin-jsx-a11y": "6.4.1",
-    "eslint-plugin-prettier": "3.3.1",
-    "eslint-plugin-react": "7.22.0",
+    "eslint": "^7.22.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jest": "^24.3.2",
     "jest": "26.6.3",
     "np": "7.4.0",
     "p-map": "^4.0.0",
