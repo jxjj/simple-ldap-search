@@ -1,7 +1,7 @@
 {
   "name": "simple-ldap-search",
   "description": "Simple LDAP Searching.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "type": "module",
   "files": [
     "index.js",
