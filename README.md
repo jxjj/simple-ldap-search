@@ -1,6 +1,5 @@
 # Simple LDAP Search
 
-[![Travis Build](https://img.shields.io/travis/jxjj/simple-ldap-search.svg?style=flat)](https://travis-ci.org/jxjj/simple-ldap-search)
 [![NPM Version](https://img.shields.io/npm/v/simple-ldap-search.svg)](https://www.npmjs.com/package/simple-ldap-search)
 
 > Searches LDAP. Nothing fancy.
