@@ -3,6 +3,7 @@
   "description": "Simple LDAP Searching.",
   "version": "3.0.1",
   "type": "module",
+  "main": "index.js",
   "files": [
     "index.js",
     "lib/**/*.js"
@@ -28,6 +29,7 @@
     "search"
   ],
   "devDependencies": {
+    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^7.22.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
