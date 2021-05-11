@@ -3,6 +3,7 @@
   "description": "Simple LDAP Searching.",
   "version": "3.0.1",
   "type": "module",
+  "exports": "./index.js",
   "files": [
     "index.js",
     "lib/**/*.js"
@@ -14,7 +15,7 @@
     "release": "np"
   },
   "engines": {
-    "node": ">=12"
+    "node": "^12.20.0 || ^14.13.1 || >=16.0.0"
   },
   "repository": {
     "type": "git",
