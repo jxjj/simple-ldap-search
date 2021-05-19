@@ -16,6 +16,12 @@ describe('simple-ldap-search index', () => {
     ldap.destroy();
   });
 
+  it('creates a new LDAP client with TLS Options', () => {
+    const ldap = new SimpleLDAP(config, {rejectUnauthorized: false});
+    expect(ldap.client instanceof ldapjs.Client).toBe(true);
+    ldap.destroy();
+  });
+
   it('ldap.destroy()', () => {
     const ldap = new SimpleLDAP(config);
     ldap.destroy();
