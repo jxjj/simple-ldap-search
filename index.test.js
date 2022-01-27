@@ -17,8 +17,11 @@ describe('simple-ldap-search index', () => {
   });
 
   it('creates a new LDAP client with TLS Options', () => {
-    const ldap = new SimpleLDAP(config, {rejectUnauthorized: false});
-    expect(ldap.client instanceof ldapjs.Client).toBe(true);
+    const ldap = new SimpleLDAP({
+      ...config,
+      tlsOptions: { rejectUnauthorized: false },
+    });
+    expect(ldap.client.tlsOptions.rejectUnauthorized).toBe(false);
     ldap.destroy();
   });
 
