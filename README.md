@@ -22,6 +22,10 @@ const config = {
   base: 'dc=users,dc=localhost',
   dn: 'cn=root',
   password: 'secret',
+  // optionally pass tls options to ldapjs
+  tlsOptions: {
+    // tls options ...
+  },
 };
 
 // create a new client

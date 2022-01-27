@@ -6,16 +6,16 @@ import cleanEntry from './lib/cleanEntry.js';
 import addListenerIfNotAdded from './lib/addListenerIfNotAdded.js';
 
 export default class SimpleLDAPSearch {
-  constructor({
-    url, base, dn, password,
-  }) {
+  constructor({ url, base, dn, password, tlsOptions = {} }) {
     this.config = {
       url,
       base,
       dn,
       password,
+      tlsOptions,
     };
-    this.client = ldap.createClient({ url });
+
+    this.client = ldap.createClient({ url, tlsOptions });
     this.isBoundTo = null;
     this.isBinding = false;
     this.queue = [];
@@ -101,7 +101,9 @@ export default class SimpleLDAPSearch {
 
         return res
           .on('searchEntry', (entry) => results.push(cleanEntry(entry.object)))
-          .once('error', (resError) => reject(new Error(`Search error: ${resError}`)))
+          .once('error', (resError) =>
+            reject(new Error(`Search error: ${resError}`)),
+          )
           .once('end', () => resolve(results));
       });
     });
