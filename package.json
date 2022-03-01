@@ -15,7 +15,7 @@
     "dist"
   ],
   "scripts": {
-    "eslint": "eslint index.js lib test",
+    "eslint": "eslint lib test",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch",
     "release": "np",
