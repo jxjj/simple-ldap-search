@@ -16,6 +16,8 @@ $ npm install --save simple-ldap-search
 
 ```js
 import SimpleLDAP from 'simple-ldap-search';
+// if using commonjs
+const SimpleLDAP = require('simple-ldap-search').default;
 
 const config = {
   url: 'ldap://0.0.0.0:1389',

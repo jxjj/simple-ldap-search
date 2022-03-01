@@ -1,8 +1,8 @@
 import ldapjs from 'ldapjs';
 import promiseMap from 'p-map';
-import config from './test/fixtures/config.example.js';
-import TestLDAPServer from './test/fixtures/TestLDAPServer.js';
-import SimpleLDAP from './index.js';
+import config from './config.example.js';
+import TestLDAPServer from './TestLDAPServer.js';
+import SimpleLDAP from '../../lib/index.js';
 
 const server = new TestLDAPServer();
 
