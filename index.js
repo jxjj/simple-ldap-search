@@ -108,4 +108,28 @@ export default class SimpleLDAPSearch {
       });
     });
   }
+
+  /**
+   * Secures the LDAP opject by using the STARTTLS verb
+   * @param {Object} opts - STARTTLS options
+   * @returns {Promise|Error} - Resolves the promise or returns the error from ldapjs
+   */
+  async starttls(opts) {
+    const self = this;
+    
+    return new Promise((resolve, reject) => {
+      // add listener to ldapjs client for error
+      addListenerIfNotAdded(this.client, 'error', reject);
+
+      // starts TLS on the LDAP
+      self.client.starttls(opts, undefined, (err, res) => {
+        // if we receive an error back
+        if (err) {
+          return reject(new Error(`STARTTLS failed: ${err.message}`));
+        }
+        // since ldapjs doesn't return timing, we just resolve if we have no error
+        resolve(res);
+      });
+    });
+  }
 }
