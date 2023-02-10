@@ -64,3 +64,13 @@ Returns
 ### `ldap.destroy()`
 
 Destroys the connection to the LDAP server. Use when all done with LDAP client.
+
+### `ldap.starttls(opts)`
+Parameters
+
+- `opts`: Object of TLS Options documented on [LDAPjs's Client API page](http://ldapjs.org/client.html#starttls)
+```
+const opts = {
+  ca: [fs.readFileSync('mycacert.pem')]
+};
+```
