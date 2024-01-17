@@ -78,12 +78,13 @@ export default class SimpleLDAPSearch {
    * searches ldap. Will autobind if
    * this.config.dn and this.config.password are set.
    */
-  async search(filter = '(objectclass=*)', attributes) {
+  async search(filter = '(objectclass=*)', attributes, timeLimit=10) {
     const self = this;
     const opts = {
       scope: 'sub',
       filter,
       attributes,
+      timeLimit,
     };
     const results = [];
 
